@@ -1,4 +1,5 @@
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
+
 
 /**
  * Delete a page from the given PDF.
