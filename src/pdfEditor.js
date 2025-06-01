@@ -1,6 +1,9 @@
 import * as pdfjsLib from 'pdfjs-dist/build/pdf';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 
+// 🔧 REQUIRED for PDF.js to render
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+
 const fileInput = document.getElementById('pdf-upload');
 const pdfContainer = document.getElementById('pdf-container');
 const downloadBtn = document.getElementById('download-pdf');
@@ -41,7 +44,7 @@ async function renderPDF(buffer) {
     textLayerDiv.style.left = `${canvas.offsetLeft}px`;
     pdfContainer.appendChild(textLayerDiv);
 
-    await page.render({ canvasContext: context, viewport: viewport }).promise;
+    await page.render({ canvasContext: context, viewport }).promise;
 
     const textContent = await page.getTextContent();
     textContent.items.forEach((item, index) => {
@@ -49,6 +52,7 @@ async function renderPDF(buffer) {
       span.className = 'text-span';
       span.contentEditable = true;
       span.innerText = item.str;
+
       const transform = pdfjsLib.Util.transform(viewport.transform, item.transform);
       const x = transform[4];
       const y = transform[5] - item.height;
@@ -60,6 +64,7 @@ async function renderPDF(buffer) {
       span.style.fontFamily = item.fontName || 'Helvetica';
       span.dataset.page = pageNum;
       span.dataset.index = index;
+
       textLayerDiv.appendChild(span);
     });
   }

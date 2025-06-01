@@ -2,17 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PDF4EVER Editor</title>
 
-  <!-- Use your custom fonts -->
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+
+  <!-- Font Styles (local custom fonts) -->
   <link rel="stylesheet" href="/fonts.css" />
 
-  <!-- Global styles -->
+  <!-- Optional: Global Stylesheet -->
   <link rel="stylesheet" href="/src/index.css" />
-
-  <!-- Favicon to fix 404 -->
-  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
 
   <style>
     body {
@@ -20,6 +21,15 @@
       margin: 0;
       padding: 20px;
       background-color: #f4f4f4;
+      color: #222;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    #pdf-upload {
+      display: block;
+      margin-bottom: 15px;
     }
     #pdf-container {
       position: relative;
@@ -39,73 +49,34 @@
       padding: 1px 2px;
       border-radius: 2px;
       cursor: text;
+      user-select: text;
     }
     button {
       padding: 10px 20px;
-      margin-top: 10px;
+      margin-top: 15px;
       font-size: 16px;
       cursor: pointer;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #0056b3;
     }
   </style>
 </head>
+
 <body>
-  <h1>PDF4EVER Editor</h1>
-  <input type="file" id="pdf-upload" accept="application/pdf" />
-  <div id="pdf-container"></div>
-  <button id="download-pdf">Download Edited PDF</button>
+  <main>
+    <h1>PDF4EVER Editor</h1>
+    <input type="file" id="pdf-upload" accept="application/pdf" />
+    <div id="pdf-container"></div>
+    <button id="download-pdf">Download Edited PDF</button>
+  </main>
 
-  <!-- PDF libraries -->
-  <script src="https://unpkg.com/pdfjs-dist/build/pdf.min.js"></script>
-  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-
-  <!-- Load your actual JS from built assets, not src/ -->
-  <script type="module" src="/assets/index.js"></script>
+  <!-- Your JS Entry Point -->
+  <script type="module" src="/src/pdfEditor.js"></script>
 </body>
 </html>
-<script>
-  // Ensure PDF.js worker is set up correctly
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist/build/pdf.worker.min.js';
-
-  // Initialize PDF viewer and editor
-  document.getElementById('pdf-upload').addEventListener('change', async (event) => {
-    const file = event.target.files[0];
-    if (file && file.type === 'application/pdf') {
-      const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      const container = document.getElementById('pdf-container');
-      container.innerHTML = ''; // Clear previous content
-
-      for (let i = 1; i <= pdfDoc.numPages; i++) {
-        const page = await pdfDoc.getPage(i);
-        const viewport = page.getViewport({ scale: 1.5 });
-        const canvas = document.createElement('canvas');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        container.appendChild(canvas);
-
-        const context = canvas.getContext('2d');
-        await page.render({ canvasContext: context, viewport }).promise;
-
-        // Add text layer
-        const textLayerDiv = document.createElement('div');
-        textLayerDiv.className = 'textLayer';
-        container.appendChild(textLayerDiv);
-        
-        await page.getTextContent().then((textContent) => {
-          pdfjsLib.renderTextLayer({
-            textContent,
-            container: textLayerDiv,
-            viewport,
-            textDivs: []
-          });
-        });
-      }
-    } else {
-      alert('Please upload a valid PDF file.');
-    }
-  });
-
-  document.getElementById('download-pdf').addEventListener('click', () => {
-    alert('Download functionality not implemented yet.');
-  });
-</script>
