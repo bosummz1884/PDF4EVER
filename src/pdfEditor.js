@@ -1,8 +1,10 @@
 import * as pdfjsLib from 'pdfjs-dist/build/pdf';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker?url'; 
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 
 // 🔧 REQUIRED for PDF.js to render
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 const fileInput = document.getElementById('pdf-upload');
 const pdfContainer = document.getElementById('pdf-container');
@@ -27,14 +29,22 @@ async function renderPDF(buffer) {
 
   for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
     const page = await pdf.getPage(pageNum);
-    const viewport = page.getViewport({ scale: 1.5 });
+    const viewport = page.getViewport({ scale: 2.5 });
 
     const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext('2d', { alpha: false }); // Better performance
+
     canvas.width = viewport.width;
     canvas.height = viewport.height;
-    pdfContainer.appendChild(canvas);
 
+    canvas.style.width = `${viewport.width}px`;
+    canvas.style.height = `${viewport.height}px`;
+    canvas.style.imageRendering = 'pixelated'; // Optional, good for scanned docs
+    canvas.style.display = 'block';            // Avoid inline spacing artifacts
+    canvas.style.marginBottom = '10px';
+    canvas.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)'; // Same as original
+
+    pdfContainer.appendChild(canvas);
     const textLayerDiv = document.createElement('div');
     textLayerDiv.className = 'textLayer';
     textLayerDiv.style.width = `${viewport.width}px`;
