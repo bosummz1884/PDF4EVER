@@ -1,6 +1,6 @@
+import * as pdfjsLib from 'pdfjs-dist/build/pdf';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 
-const pdfjsLib = window['pdfjs-dist/build/pdf'];
-const { PDFDocument, StandardFonts } = window['pdf-lib'];
 const fileInput = document.getElementById('pdf-upload');
 const pdfContainer = document.getElementById('pdf-container');
 const downloadBtn = document.getElementById('download-pdf');
@@ -49,10 +49,7 @@ async function renderPDF(buffer) {
       span.className = 'text-span';
       span.contentEditable = true;
       span.innerText = item.str;
-      const transform = pdfjsLib.Util.transform(
-        viewport.transform,
-        item.transform
-      );
+      const transform = pdfjsLib.Util.transform(viewport.transform, item.transform);
       const x = transform[4];
       const y = transform[5] - item.height;
 
