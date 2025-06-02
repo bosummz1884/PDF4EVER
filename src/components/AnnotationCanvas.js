@@ -1,91 +1,86 @@
-import 'package:flutter/material.dart';
-import 'dart:ui' as ui;
+import React, { useRef, useState } from 'react';
 
-class AnnotationCanvas extends StatefulWidget {
-  final void Function(ui.Image)? onCapture;
+export default function AnnotationCanvas({ onCapture }) {
+  const canvasRef = useRef(null);
+  const [drawing, setDrawing] = useState(false);
+  const [points, setPoints] = useState([]);
 
-  const AnnotationCanvas({super.key, this.onCapture});
+  const strokeColor = 'red';
+  const strokeWidth = 3;
 
-  @override
-  State<AnnotationCanvas> createState() => _AnnotationCanvasState();
-}
+  const handleMouseDown = (e) => {
+    setDrawing(true);
+    const rect = canvasRef.current.getBoundingClientRect();
+    const pos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    setPoints((prev) => [...prev, pos]);
+  };
 
-class _AnnotationCanvasState extends State<AnnotationCanvas> {
-  final _points = <Offset>[];
-  final _color = Colors.red;
-  final _strokeWidth = 3.0;
+  const handleMouseMove = (e) => {
+    if (!drawing) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const pos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    setPoints((prev) => [...prev, pos]);
+    drawLine(points[points.length - 1], pos);
+  };
 
-  final _repaintKey = GlobalKey();
+  const handleMouseUp = () => {
+    setDrawing(false);
+  };
 
-  Future<void> _captureImage() async {
-    final boundary = _repaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-    if (boundary != null) {
-      final image = await boundary.toImage(pixelRatio: 3.0);
-      widget.onCapture?.call(image);
+  const drawLine = (start, end) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx || !start || !end) return;
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = strokeWidth;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(end.x, end.y);
+    ctx.stroke();
+  };
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      setPoints([]);
     }
-  }
+  };
 
-  void _clearCanvas() {
-    setState(() => _points.clear());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        RepaintBoundary(
-          key: _repaintKey,
-          child: GestureDetector(
-            onPanUpdate: (details) {
-              setState(() {
-                final renderBox = context.findRenderObject() as RenderBox;
-                _points.add(renderBox.globalToLocal(details.globalPosition));
-              });
-            },
-            onPanEnd: (_) => _points.add(Offset.zero),
-            child: CustomPaint(
-              painter: _DrawingPainter(points: _points, color: _color, strokeWidth: _strokeWidth),
-              size: Size.infinite,
-            ),
-          ),
-        ),
-        Positioned(
-          right: 10,
-          top: 10,
-          child: Column(
-            children: [
-              ElevatedButton(onPressed: _clearCanvas, child: const Text("Clear")),
-              const SizedBox(height: 10),
-              ElevatedButton(onPressed: _captureImage, child: const Text("Save")),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DrawingPainter extends CustomPainter {
-  final List<Offset> points;
-  final Color color;
-  final double strokeWidth;
-
-  _DrawingPainter({required this.points, required this.color, required this.strokeWidth});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    for (var i = 0; i < points.length - 1; i++) {
-      if (points[i] != Offset.zero && points[i + 1] != Offset.zero) {
-        canvas.drawLine(points[i], points[i + 1], paint);
-      }
+  const captureCanvas = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.toBlob((blob) => {
+        if (blob && onCapture) {
+          const fileReader = new FileReader();
+          fileReader.onload = () => {
+            const imageData = new Uint8Array(fileReader.result);
+            onCapture(imageData);
+          };
+          fileReader.readAsArrayBuffer(blob);
+        }
+      }, 'image/png');
     }
-  }
+  };
 
-  @override
-  bool shouldRepaint(_DrawingPainter oldDelegate) => true;
+  return (
+    <div style={{ position: 'relative' }}>
+      <canvas
+        ref={canvasRef}
+        width={800}
+        height={600}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        style={{ border: '1px solid #ccc', background: '#fff' }}
+      />
+      <div style={{ position: 'absolute', top: 10, right: 10 }}>
+        <button onClick={clearCanvas}>Clear</button>
+        <button onClick={captureCanvas} style={{ marginLeft: '10px' }}>Save</button>
+      </div>
+    </div>
+  );
 }
