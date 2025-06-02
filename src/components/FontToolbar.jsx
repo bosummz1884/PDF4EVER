@@ -1,35 +1,64 @@
-import React from 'react';
-import styled from 'styled-components';
+// src/components/FontToolbar.jsx
+import React, { useState } from "react";
+import styled from "styled-components";
 
-const Toolbar = styled.div`
-  position: fixed;
-  top: 0;
-  right: 0;
-  padding: 0.75rem;
-  background: rgba(255, 255, 255, 0.95);
-  border-left: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
-  z-index: 10;
+const ToolbarWrapper = styled.div`
   display: flex;
   gap: 1rem;
   align-items: center;
-
-  @media (prefers-color-scheme: dark) {
-    background: rgba(18, 18, 18, 0.95);
-    color: white;
-    border-color: #333;
-  }
+  margin: 1rem 0;
 `;
 
-export default function FontToolbar({ currentFont, availableFonts, onFontChange }) {
+const Label = styled.label`
+  font-weight: bold;
+`;
+
+const Input = styled.input`
+  padding: 0.25rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+`;
+
+const Select = styled.select`
+  padding: 0.25rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+`;
+
+const FontToolbar = ({ onChange }) => {
+  const [fontSize, setFontSize] = useState(24);
+  const [fontColor, setFontColor] = useState("#000000");
+
+  const handleFontSizeChange = (e) => {
+    const size = parseInt(e.target.value);
+    setFontSize(size);
+    onChange({ fontSize: size, fontColor });
+  };
+
+  const handleColorChange = (e) => {
+    const color = e.target.value;
+    setFontColor(color);
+    onChange({ fontSize, fontColor: color });
+  };
+
   return (
-    <Toolbar>
-      <label htmlFor="font-picker">Font:</label>
-      <select id="font-picker" value={currentFont} onChange={(e) => onFontChange(e.target.value)}>
-        {availableFonts.map((font, i) => (
-          <option key={i} value={font}>{font}</option>
-        ))}
-      </select>
-    </Toolbar>
+    <ToolbarWrapper>
+      <Label>
+        Font Size:
+        <Select value={fontSize} onChange={handleFontSizeChange}>
+          {[12, 16, 20, 24, 28, 32, 36, 48].map((size) => (
+            <option key={size} value={size}>
+              {size}
+            </option>
+          ))}
+        </Select>
+      </Label>
+      <Label>
+        Color:
+        <Input type="color" value={fontColor} onChange={handleColorChange} />
+      </Label>
+    </ToolbarWrapper>
   );
-}
+};
+
+export default FontToolbar;

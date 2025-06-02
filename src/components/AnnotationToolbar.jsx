@@ -1,63 +1,36 @@
-import React from 'react';
-import styled from 'styled-components';
+// src/components/AnnotationToolbar.jsx
+import React from "react";
+import styled from "styled-components";
 
 const ToolbarWrapper = styled.div`
-  position: fixed;
-  left: 20px;
-  bottom: 20px;
-  z-index: 1000;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
   display: flex;
-  gap: 8px;
-  padding: 0.5rem;
-
-  @media (prefers-color-scheme: dark) {
-    background: #222;
-    border-color: #444;
-    color: white;
-  }
+  gap: 1rem;
+  margin: 1rem 0;
+  justify-content: center;
 `;
 
-const ToolButton = styled.button`
-  border: none;
-  background: ${(props) => (props.active ? '#444' : '#ddd')};
-  color: ${(props) => (props.active ? '#fff' : '#000')};
-  padding: 6px 10px;
-  border-radius: 4px;
+const Button = styled.button`
+  padding: 0.5rem 1rem;
   font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  background-color: #4f46e5;
+  color: white;
   cursor: pointer;
 
   &:hover {
-    background: ${(props) => (props.active ? '#333' : '#ccc')};
-  }
-
-  @media (prefers-color-scheme: dark) {
-    background: ${(props) => (props.active ? '#eee' : '#444')};
-    color: ${(props) => (props.active ? '#000' : '#fff')};
-
-    &:hover {
-      background: ${(props) => (props.active ? '#fff' : '#555')};
-    }
+    background-color: #4338ca;
   }
 `;
 
-export default function AnnotationToolbar({ activeTool, onChangeTool }) {
-  const tools = ['select', 'highlight', 'draw'];
-
+const AnnotationToolbar = ({ onTextInsert, onHighlight, onReset }) => {
   return (
     <ToolbarWrapper>
-      {tools.map((tool) => (
-        <ToolButton
-          key={tool}
-          active={tool === activeTool}
-          onClick={() => onChangeTool(tool)}
-        >
-          {tool.charAt(0).toUpperCase() + tool.slice(1)}
-        </ToolButton>
-      ))}
+      <Button onClick={() => onTextInsert("CONFIDENTIAL")}>Add 'CONFIDENTIAL'</Button>
+      <Button onClick={onHighlight}>Highlight Section</Button>
+      <Button onClick={onReset}>Reset PDF</Button>
     </ToolbarWrapper>
   );
-}
+};
+
+export default AnnotationToolbar;

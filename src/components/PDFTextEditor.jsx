@@ -1,170 +1,83 @@
-import React, { useEffect, useRef, useState } from 'react';
-import ContentEditable from 'react-contenteditable';
-import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist/legacy/build/pdf';
-import pdfWorker from 'pdfjs-dist/build/pdf.worker?worker';
-import styled from 'styled-components';
+// src/components/PDFTextEditor.jsx
+import React, { useRef, useEffect, useState } from "react";
+import { PDFDocument } from "pdf-lib";
+import * as pdfjsLib from "pdfjs-dist/build/pdf";
+import pdfjsWorker from "pdfjs-dist/build/pdf.worker?worker";
+const workerBlob = new Blob([pdfjsWorker], { type: "application/javascript" });
+const workerUrl = URL.createObjectURL(workerBlob);
+import AnnotationCanvas from "components/AnnotationCanvas.jsx";
+import EditableTextLayer from "components/EditableTextLayer.jsx";
+import SignatureCaptureWidget from "components/SignatureCaptureWidget.jsx";
 
-import FontToolbar from './FontToolbar';
-import SavePDFButton from 'SavePDFButton';
-import AnnotationCanvas from './AnnotationCanvas';
-import AnnotationToolbar from './AnnotationToolbar';
-import StickyNoteTool from './StickyNoteTool';
-import PageActions from 'PageActions';
+// Ensure PDF.js is configured to use the worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
-GlobalWorkerOptions.workerSrc = pdfWorker;
-
-const ViewerContainer = styled.div`s
-  display: flex;
-  position: relative;
-  width: 100%;
-  height: 100%;
-`;
-
-const CanvasWrapper = styled.div`
-  flex: 1;
-  position: relative;
-  overflow: auto;
-`;
-
-const Sidebar = styled.div`
-  width: 100px;
-  background: #f2f2f2;
-  border-right: 1px solid #ccc;
-  overflow-y: auto;
-`;
-
-const PageButton = styled.button`
-  display: block;
-  width: 100%;
-  padding: 0.5rem;
-  border: none;
-  background: #fff;
-  border-bottom: 1px solid #ccc;
-  cursor: pointer;
-  &:hover {
-    background: #eee;
-  }
-`;
-
-export default function PDFTextEditor({ pdfBytes, premium }) {
+const PDFTextEditor = ({ file }) => {
   const canvasRef = useRef(null);
-  const [pdfDoc, setPdfDoc] = useState(null);
-  const [currentBytes, setCurrentBytes] = useState(pdfBytes);
-  const [textBlocks, setTextBlocks] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [numPages, setNumPages] = useState(0);
-  const [currentFont, setCurrentFont] = useState('Helvetica');
-  const [activeTool, setActiveTool] = useState('select');
-  const [notes, setNotes] = useState([]);
-
-  const availableFonts = [
-    'Helvetica', 'Arial', 'Times New Roman', 'Courier New',
-    'Georgia', 'Verdana', 'Tahoma', 'Trebuchet MS'
-  ];
+  const [textItems, setTextItems] = useState([]);
+  const [pdfData, setPdfData] = useState(null);
 
   useEffect(() => {
-    if (!currentBytes) return;
-    (async () => {
-      const loadingTask = getDocument({ data: currentBytes });
-      const doc = await loadingTask.promise;
-      setPdfDoc(doc);
-      setNumPages(doc.numPages);
-      await renderPage(doc, 1);
-    })();
-  }, [currentBytes]);
+    if (!file) return;
 
-  const renderPage = async (doc, pageNum) => {
-    const page = await doc.getPage(pageNum);
-    const viewport = page.getViewport({ scale: 1.0 });
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
-    await page.render({ canvasContext: ctx, viewport }).promise;
+    const renderPDF = async () => {
+      const fileReader = new FileReader();
+      fileReader.onload = async () => {
+        const typedArray = new Uint8Array(fileReader.result);
+        const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+        const page = await pdf.getPage(1);
 
-    const textContent = await page.getTextContent();
-    const items = textContent.items.map((item) => ({
-      str: item.str,
-      transform: item.transform,
-      fontName: item.fontName,
-      width: item.width,
-      height: item.height,
-    }));
-    setTextBlocks(items);
-    setCurrentPage(pageNum);
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = canvasRef.current;
+        const context = canvas.getContext("2d");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        await page.render({ canvasContext: context, viewport }).promise;
+
+        const textContent = await page.getTextContent();
+        setTextItems(textContent.items);
+        setPdfData(fileReader.result); // store original PDF data
+      };
+      fileReader.readAsArrayBuffer(file);
+    };
+
+    renderPDF();
+  }, [file]);
+
+  const handleSave = async () => {
+    if (!pdfData) return;
+
+    const pdfDoc = await PDFDocument.load(pdfData);
+    const pages = pdfDoc.getPages();
+    const firstPage = pages[0];
+
+    // Example: adding text
+    const font = await pdfDoc.embedFont(PDFDocument.PDFName.Helvetica);
+    firstPage.drawText("Sample Text", {
+      x: 50,
+      y: 700,
+      size: 18,
+      font,
+      color: pdfLib.rgb(0, 0, 0)
+    });
+
+    const modifiedBytes = await pdfDoc.save();
+    const blob = new Blob([modifiedBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    window.open(url);
   };
 
   return (
-    <ViewerContainer>
-      <Sidebar>
-        {[...Array(numPages)].map((_, i) => (
-          <PageButton key={i} onClick={() => renderPage(pdfDoc, i + 1)}>
-            Page {i + 1}
-          </PageButton>
-        ))}
-      </Sidebar>
-
-      <CanvasWrapper>
-        {premium && (
-          <FontToolbar
-            currentFont={currentFont}
-            availableFonts={availableFonts}
-            onFontChange={setCurrentFont}
-          />
-        )}
-
-        <PageActions
-          pdfBytes={currentBytes}
-          currentPage={currentPage}
-          setPdfBytes={setCurrentBytes}
-        />
-
-        <canvas ref={canvasRef} />
-
-        <AnnotationCanvas
-          width={canvasRef.current?.width}
-          height={canvasRef.current?.height}
-          tool={activeTool}
-        />
-
-        <StickyNoteTool notes={notes} setNotes={setNotes} />
-
-        {textBlocks.map((tb, i) => {
-          const [a, b, c, d, x, y] = tb.transform;
-          const isEditable = premium || i < 3;
-
-          return (
-            <ContentEditable
-              key={i}
-              html={tb.str}
-              disabled={!isEditable}
-              onChange={(e) => {
-                const newBlocks = [...textBlocks];
-                newBlocks[i].str = e.target.value;
-                setTextBlocks(newBlocks);
-              }}
-              style={{
-                position: 'absolute',
-                transform: `matrix(${a},${b},${c},${d},${x},${canvasRef.current?.height - y})`,
-                fontFamily: premium ? currentFont : tb.fontName || 'Helvetica',
-                background: premium ? 'rgba(255,255,255,0.3)' : 'transparent',
-                outline: premium ? '1px dashed rgba(0,0,0,0.2)' : 'none',
-                whiteSpace: 'nowrap',
-                padding: '1px',
-                color: premium ? '#111' : 'inherit'
-              }}
-            />
-          );
-        })}
-
-        <SavePDFButton
-          pdfBytes={currentBytes}
-          textBlocks={textBlocks}
-          pageHeight={canvasRef.current?.height || 800}
-        />
-      </CanvasWrapper>
-
-      <AnnotationToolbar activeTool={activeTool} onChangeTool={setActiveTool} />
-    </ViewerContainer>
+    <div className="pdf-editor">
+      <canvas ref={canvasRef} />
+      {/* Text items and annotations will be placed via EditableTextLayer and AnnotationCanvas */}
+      <EditableTextLayer items={textItems} />
+      <AnnotationCanvas />
+      <SignatureCaptureWidget onSigned={(data) => console.log("Signature:", data)} onClose={() => {}} />
+      <button onClick={handleSave}>Save PDF</button>
+    </div>
   );
-}
+};
+
+export default PDFTextEditor;

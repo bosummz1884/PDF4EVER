@@ -1,86 +1,84 @@
 import React, { useRef, useState } from 'react';
 
-export default function AnnotationCanvas({ onCapture }) {
+const AnnotationCanvas = ({ onCapture }) => {
   const canvasRef = useRef(null);
-  const [drawing, setDrawing] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
   const [points, setPoints] = useState([]);
 
-  const strokeColor = 'red';
+  const color = '#ff0000';
   const strokeWidth = 3;
 
   const handleMouseDown = (e) => {
-    setDrawing(true);
-    const rect = canvasRef.current.getBoundingClientRect();
-    const pos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    setPoints((prev) => [...prev, pos]);
+    setIsDrawing(true);
+    const { offsetX, offsetY } = e.nativeEvent;
+    setPoints([{ x: offsetX, y: offsetY }]);
   };
 
   const handleMouseMove = (e) => {
-    if (!drawing) return;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const pos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    setPoints((prev) => [...prev, pos]);
-    drawLine(points[points.length - 1], pos);
+    if (!isDrawing) return;
+    const { offsetX, offsetY } = e.nativeEvent;
+    setPoints((prev) => [...prev, { x: offsetX, y: offsetY }]);
+    drawLine();
   };
 
   const handleMouseUp = () => {
-    setDrawing(false);
+    setIsDrawing(false);
+    setPoints((prev) => [...prev, null]); // null = separator
   };
 
-  const drawLine = (start, end) => {
+  const drawLine = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    if (!ctx || !start || !end) return;
-    ctx.strokeStyle = strokeColor;
+
+    ctx.strokeStyle = color;
     ctx.lineWidth = strokeWidth;
     ctx.lineCap = 'round';
+
     ctx.beginPath();
-    ctx.moveTo(start.x, start.y);
-    ctx.lineTo(end.x, end.y);
-    ctx.stroke();
+    const last = points[points.length - 1];
+    const beforeLast = points[points.length - 2];
+    if (last && beforeLast) {
+      ctx.moveTo(beforeLast.x, beforeLast.y);
+      ctx.lineTo(last.x, last.y);
+      ctx.stroke();
+    }
   };
 
   const clearCanvas = () => {
     const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      setPoints([]);
-    }
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setPoints([]);
   };
 
-  const captureCanvas = () => {
+  const captureImage = () => {
     const canvas = canvasRef.current;
-    if (canvas) {
-      canvas.toBlob((blob) => {
-        if (blob && onCapture) {
-          const fileReader = new FileReader();
-          fileReader.onload = () => {
-            const imageData = new Uint8Array(fileReader.result);
-            onCapture(imageData);
-          };
-          fileReader.readAsArrayBuffer(blob);
-        }
-      }, 'image/png');
-    }
+    canvas.toBlob((blob) => {
+      if (onCapture && blob) {
+        onCapture(blob);
+      }
+    }, 'image/png');
   };
 
   return (
     <div style={{ position: 'relative' }}>
       <canvas
         ref={canvasRef}
-        width={800}
-        height={600}
+        width={window.innerWidth}
+        height={window.innerHeight}
+        style={{ border: '1px solid #ccc', touchAction: 'none' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        style={{ border: '1px solid #ccc', background: '#fff' }}
+        onMouseOut={handleMouseUp}
       />
       <div style={{ position: 'absolute', top: 10, right: 10 }}>
-        <button onClick={clearCanvas}>Clear</button>
-        <button onClick={captureCanvas} style={{ marginLeft: '10px' }}>Save</button>
+        <button onClick={clearCanvas} style={{ marginBottom: '10px' }}>Clear</button>
+        <br />
+        <button onClick={captureImage}>Save</button>
       </div>
     </div>
   );
-}
+};
+
+export default AnnotationCanvas;

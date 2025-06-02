@@ -4,7 +4,7 @@ import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist/legacy/build/pdf';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker?worker';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 import styled from 'styled-components';
-
+import PDFMerger from './PDFMerger';
 import FontToolbar from './FontToolbar';
 import SavePDFButton from './SavePDFButton';
 import AnnotationCanvas from './AnnotationCanvas';

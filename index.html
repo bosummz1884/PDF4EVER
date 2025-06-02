@@ -2,21 +2,30 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="theme-color" content="#ffffff" />
     <meta name="description" content="PDF4EVER - Powerful PDF Editor & Converter" />
+    <meta name="keywords" content="PDF editor, merge PDF, sign PDF, annotate, convert PDF, Camera to PDF" />
+    <meta name="author" content="PDF4EVER.org" />
+    <meta property="og:title" content="PDF4EVER Editor" />
+    <meta property="og:description" content="Edit, merge, sign, and convert PDFs in your browser for free." />
+    <meta property="og:image" content="/preview.png" />
+    <meta property="og:url" content="https://pdf4ever.org" />
+    <meta name="twitter:card" content="summary_large_image" />
+
     <title>PDF4EVER Editor</title>
 
-    <!-- Favicon -->
+    <!-- Icons and Favicons -->
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-    <!-- Local Fonts -->
+    <!-- Fonts -->
     <link rel="stylesheet" href="/fonts.css" />
-
-    <!-- Custom Styles -->
-    <link rel="stylesheet" href="/src/index.css" />
-
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+    <!-- Inline Styling (global overrides) -->
     <style>
       body {
         font-family: 'Work Sans', 'Open Sans', 'Roboto', sans-serif;
@@ -25,18 +34,22 @@
         background-color: #f4f4f4;
         color: #222;
       }
+
       h1 {
         font-size: 2rem;
         margin-bottom: 1rem;
       }
+
       canvas {
         display: block;
         margin-bottom: 10px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       }
+
       .textLayer {
         pointer-events: none;
       }
+
       .text-span {
         pointer-events: auto;
         background-color: rgba(255, 255, 255, 0.7);
@@ -45,6 +58,7 @@
         cursor: text;
         user-select: text;
       }
+
       button {
         padding: 10px 20px;
         margin-top: 15px;
@@ -56,6 +70,7 @@
         border-radius: 4px;
         transition: background-color 0.2s;
       }
+
       button:hover {
         background-color: #0056b3;
       }

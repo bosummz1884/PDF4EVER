@@ -1,87 +1,49 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { mergePDFs } from '../utils/mergePDFs';
+// src/components/PDFMerger.jsx
+import React, { useState } from "react";
+import { mergePDFs } from "../utils/mergePDFs";
+import styled from "styled-components";
 
-const Wrapper = styled.div`
-  max-width: 600px;
-  margin: 2rem auto;
-  padding: 1rem;
-  border: 2px dashed #aaa;
-  border-radius: 8px;
-  text-align: center;
-  background: var(--bg-color);
-  color: var(--text-color);
+const MergerContainer = styled.div`
+  margin: 2rem 0;
+  padding: 2rem;
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  background-color: #fafafa;
 `;
 
-const FileList = styled.ul`
-  text-align: left;
-  padding-left: 1rem;
-  font-size: 0.9rem;
+const Input = styled.input`
+  margin-bottom: 1rem;
 `;
 
-const Button = styled.button`
-  background: #333;
-  color: white;
-  padding: 0.6rem 1.2rem;
-  margin-top: 1rem;
-  border: none;
-  border-radius: 5px;
-  font-weight: bold;
-  cursor: pointer;
+const PDFMerger = () => {
+  const [mergedUrl, setMergedUrl] = useState(null);
 
-  &:hover {
-    background: #111;
-  }
-`;
+  const handleMerge = async (e) => {
+    const files = Array.from(e.target.files).filter((file) =>
+      file.type.includes("pdf")
+    );
 
-export default function PDFMerger() {
-  const [files, setFiles] = useState([]);
-  const [merging, setMerging] = useState(false);
+    const buffers = await Promise.all(files.map((file) => file.arrayBuffer()));
+    const mergedPdfBytes = await mergePDFs(buffers);
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    const dropped = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
-    setFiles((prev) => [...prev, ...dropped]);
-  };
-
-  const handleMerge = async () => {
-    setMerging(true);
-    const buffers = await Promise.all(files.map(f => f.arrayBuffer().then(buf => new Uint8Array(buf))));
-    const merged = await mergePDFs(buffers);
-    const blob = new Blob([merged], { type: 'application/pdf' });
+    const blob = new Blob([mergedPdfBytes], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'merged.pdf';
-    a.click();
-    setMerging(false);
-  };
-
-  const handleFileSelect = (e) => {
-    const picked = Array.from(e.target.files).filter(f => f.type === 'application/pdf');
-    setFiles((prev) => [...prev, ...picked]);
+    setMergedUrl(url);
   };
 
   return (
-    <Wrapper
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={handleDrop}
-    >
+    <MergerContainer>
       <h2>Merge PDF Files</h2>
-      <p>Drag and drop PDF files here or select them below:</p>
-      <input type="file" accept="application/pdf" multiple onChange={handleFileSelect} />
-      {files.length > 0 && (
-        <>
-          <FileList>
-            {files.map((f, i) => (
-              <li key={i}>{f.name}</li>
-            ))}
-          </FileList>
-          <Button onClick={handleMerge} disabled={merging}>
-            {merging ? 'Merging...' : 'Merge PDFs'}
-          </Button>
-        </>
+      <Input type="file" multiple accept="application/pdf" onChange={handleMerge} />
+      {mergedUrl && (
+        <p>
+          <a href={mergedUrl} target="_blank" rel="noopener noreferrer">
+            View Merged PDF
+          </a>
+        </p>
       )}
-    </Wrapper>
+    </MergerContainer>
   );
-}
+};
+
+export default PDFMerger;
