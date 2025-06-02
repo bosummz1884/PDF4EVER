@@ -1,5 +1,5 @@
 /* Import custom font definitions */
-@import url('/fonts.css');
+@import './fonts.css';
 
 /* Reset and base styles */
 * {
@@ -9,7 +9,7 @@
 }
 
 body {
-  font-family: 'Work Sans', 'Open Sans', 'Roboto', sans-serif;
+  font-family: 'Arial', 'Times New Roman', 'Calibri', 'Tahoma', 'Verdana', 'Segoe UI', 'Georgia', 'Comic Sans MS', 'Courier New', sans-serif;
   background-color: #fff;
   color: #1a1a1a;
   font-size: 16px;
@@ -25,7 +25,42 @@ body {
 }
 
 /* PDF canvas container */
+.pdf-editor {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+}
+
 .pdf-editor canvas {
   border: 1px solid #ccc;
   margin-top: 1rem;
+  image-rendering: optimizeQuality;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.textLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: auto;
+  user-select: text;
+}
+
+.text-span {
+  position: absolute;
+  white-space: pre;
+  color: transparent;
+  text-shadow: 0 0 0 #000;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: normal;
+  line-height: 1;
+  cursor: text;
+}
+
+.text-span[contenteditable="true"]:focus {
+  outline: 1px solid #007bff;
+  background-color: rgba(0, 123, 255, 0.05);
 }

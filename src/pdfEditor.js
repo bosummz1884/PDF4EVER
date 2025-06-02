@@ -1,129 +1,173 @@
-import * as pdfjsLib from 'pdfjs-dist/build/pdf';
-import pdfWorker from 'pdfjs-dist/build/pdf.worker?url'; 
+import React, { useEffect, useRef, useState } from 'react';
+import ContentEditable from 'react-contenteditable';
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist/legacy/build/pdf';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker?worker';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
+import styled from 'styled-components';
 
-// 🔧 REQUIRED for PDF.js to render
+import FontToolbar from './FontToolbar';
+import SavePDFButton from './SavePDFButton';
+import AnnotationCanvas from './AnnotationCanvas';
+import AnnotationToolbar from './AnnotationToolbar';
+import StickyNoteTool from './StickyNoteTool';
+import PageActions from './PageActions';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+GlobalWorkerOptions.workerSrc = pdfWorker;
 
-const fileInput = document.getElementById('pdf-upload');
-const pdfContainer = document.getElementById('pdf-container');
-const downloadBtn = document.getElementById('download-pdf');
+const ViewerContainer = styled.div`
+  display: flex;
+  position: relative;
+  width: 100%;
+  height: 100%;
+`;
 
-let currentPdf = null;
-let editedTextItems = [];
+const CanvasWrapper = styled.div`
+  flex: 1;
+  position: relative;
+  overflow: auto;
+`;
 
-fileInput.addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+const Sidebar = styled.div`
+  width: 100px;
+  background: #f2f2f2;
+  border-right: 1px solid #ccc;
+  overflow-y: auto;
+`;
 
-  const arrayBuffer = await file.arrayBuffer();
-  currentPdf = arrayBuffer;
-  renderPDF(arrayBuffer);
-});
+const PageButton = styled.button`
+  display: block;
+  width: 100%;
+  padding: 0.5rem;
+  border: none;
+  background: #fff;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+  &:hover {
+    background: #eee;
+  }
+`;
 
-async function renderPDF(buffer) {
-  const loadingTask = pdfjsLib.getDocument({ data: buffer });
-  const pdf = await loadingTask.promise;
-  pdfContainer.innerHTML = '';
+export default function PDFTextEditor({ pdfBytes, premium }) {
+  const canvasRef = useRef(null);
+  const [pdfDoc, setPdfDoc] = useState(null);
+  const [currentBytes, setCurrentBytes] = useState(pdfBytes);
+  const [textBlocks, setTextBlocks] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [numPages, setNumPages] = useState(0);
+  const [currentFont, setCurrentFont] = useState('Helvetica');
+  const [activeTool, setActiveTool] = useState('select');
+  const [notes, setNotes] = useState([]);
 
-  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-    const page = await pdf.getPage(pageNum);
+  const availableFonts = [
+    'Helvetica', 'Arial', 'Times New Roman', 'Courier New',
+    'Georgia', 'Verdana', 'Tahoma', 'Trebuchet MS'
+  ];
+
+  useEffect(() => {
+    if (!currentBytes) return;
+    (async () => {
+      const loadingTask = getDocument({ data: currentBytes });
+      const doc = await loadingTask.promise;
+      setPdfDoc(doc);
+      setNumPages(doc.numPages);
+      await renderPage(doc, 1);
+    })();
+  }, [currentBytes]);
+
+  const renderPage = async (doc, pageNum) => {
+    const page = await doc.getPage(pageNum);
     const viewport = page.getViewport({ scale: 2.5 });
-
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d', { alpha: false }); // Better performance
-
-    canvas.width = viewport.width;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
     canvas.height = viewport.height;
+    canvas.width = viewport.width;
 
-    canvas.style.width = `${viewport.width}px`;
-    canvas.style.height = `${viewport.height}px`;
-    canvas.style.imageRendering = 'pixelated'; // Optional, good for scanned docs
-    canvas.style.display = 'block';            // Avoid inline spacing artifacts
-    canvas.style.marginBottom = '10px';
-    canvas.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)'; // Same as original
-
-    pdfContainer.appendChild(canvas);
-    const textLayerDiv = document.createElement('div');
-    textLayerDiv.className = 'textLayer';
-    textLayerDiv.style.width = `${viewport.width}px`;
-    textLayerDiv.style.height = `${viewport.height}px`;
-    textLayerDiv.style.position = 'absolute';
-    textLayerDiv.style.top = `${canvas.offsetTop}px`;
-    textLayerDiv.style.left = `${canvas.offsetLeft}px`;
-    pdfContainer.appendChild(textLayerDiv);
-
-    await page.render({ canvasContext: context, viewport }).promise;
+    await page.render({ canvasContext: ctx, viewport }).promise;
 
     const textContent = await page.getTextContent();
-    textContent.items.forEach((item, index) => {
-      const span = document.createElement('div');
-      span.className = 'text-span';
-      span.contentEditable = true;
-      span.innerText = item.str;
+    const items = textContent.items.map((item) => ({
+      str: item.str,
+      transform: item.transform,
+      fontName: item.fontName,
+      width: item.width,
+      height: item.height,
+    }));
+    setTextBlocks(items);
+    setCurrentPage(pageNum);
+  };
 
-      const transform = pdfjsLib.Util.transform(viewport.transform, item.transform);
-      const x = transform[4];
-      const y = transform[5] - item.height;
+  return (
+    <ViewerContainer>
+      <Sidebar>
+        {[...Array(numPages)].map((_, i) => (
+          <PageButton key={i} onClick={() => renderPage(pdfDoc, i + 1)}>
+            Page {i + 1}
+          </PageButton>
+        ))}
+      </Sidebar>
 
-      span.style.position = 'absolute';
-      span.style.left = `${x}px`;
-      span.style.top = `${y}px`;
-      span.style.fontSize = `${item.height}px`;
-      span.style.fontFamily = item.fontName || 'Helvetica';
-      span.dataset.page = pageNum;
-      span.dataset.index = index;
+      <CanvasWrapper>
+        {premium && (
+          <FontToolbar
+            currentFont={currentFont}
+            availableFonts={availableFonts}
+            onFontChange={setCurrentFont}
+          />
+        )}
 
-      textLayerDiv.appendChild(span);
-    });
-  }
+        <PageActions
+          pdfBytes={currentBytes}
+          currentPage={currentPage}
+          setPdfBytes={setCurrentBytes}
+        />
+
+        <canvas ref={canvasRef} />
+
+        <AnnotationCanvas
+          width={canvasRef.current?.width}
+          height={canvasRef.current?.height}
+          tool={activeTool}
+        />
+
+        <StickyNoteTool notes={notes} setNotes={setNotes} />
+
+        {textBlocks.map((tb, i) => {
+          const [a, b, c, d, x, y] = tb.transform;
+          const isEditable = premium || i < 3;
+
+          return (
+            <ContentEditable
+              key={i}
+              html={tb.str}
+              disabled={!isEditable}
+              onChange={(e) => {
+                const newBlocks = [...textBlocks];
+                newBlocks[i].str = e.target.value;
+                setTextBlocks(newBlocks);
+              }}
+              style={{
+                position: 'absolute',
+                transform: `matrix(${a},${b},${c},${d},${x},${canvasRef.current?.height - y})`,
+                fontFamily: premium ? currentFont : tb.fontName || 'Helvetica',
+                fontSize: `${tb.height}px`,
+                background: premium ? 'rgba(255,255,255,0.3)' : 'transparent',
+                outline: premium ? '1px dashed rgba(0,0,0,0.2)' : 'none',
+                whiteSpace: 'nowrap',
+                padding: '1px',
+                color: premium ? '#111' : 'inherit'
+              }}
+            />
+          );
+        })}
+
+        <SavePDFButton
+          pdfBytes={currentBytes}
+          textBlocks={textBlocks}
+          pageHeight={canvasRef.current?.height || 800}
+        />
+      </CanvasWrapper>
+
+      <AnnotationToolbar activeTool={activeTool} onChangeTool={setActiveTool} />
+    </ViewerContainer>
+  );
 }
-
-downloadBtn.addEventListener('click', async () => {
-  if (!currentPdf) return;
-
-  const pdfDoc = await PDFDocument.load(currentPdf);
-  const pages = pdfContainer.querySelectorAll('.textLayer');
-
-  pages.forEach((layer, pageIndex) => {
-    const spans = layer.querySelectorAll('.text-span');
-    spans.forEach((span) => {
-      const editedText = span.innerText;
-      const x = parseFloat(span.style.left);
-      const y = parseFloat(span.style.top);
-      const size = parseFloat(span.style.fontSize);
-      const font = span.style.fontFamily;
-
-      editedTextItems.push({
-        pageIndex,
-        text: editedText,
-        x,
-        y,
-        size,
-        font,
-      });
-    });
-  });
-
-  for (let edit of editedTextItems) {
-    const page = pdfDoc.getPage(edit.pageIndex);
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    page.drawText(edit.text, {
-      x: edit.x,
-      y: page.getHeight() - edit.y - edit.size,
-      size: edit.size,
-      font: font,
-    });
-  }
-
-  const pdfBytes = await pdfDoc.save();
-  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'edited.pdf';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  editedTextItems = [];
-});

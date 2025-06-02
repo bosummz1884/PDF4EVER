@@ -1,16 +1,18 @@
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
-  root: '.', // Use current directory as root
+  root: '.', // Current directory as root
   publicDir: 'public', // Static assets (favicon, fonts, etc.)
+  plugins: [react()],
   build: {
     outDir: 'dist', // Output folder
     assetsDir: 'assets', // Folder for JS/CSS chunks
     sourcemap: true, // Enable source maps for debugging
     chunkSizeWarningLimit: 1500, // Raise limit to suppress chunk size warnings
     rollupOptions: {
-      input: path.resolve(__dirname, 'index.html'), // Entry HTML
+      input: path.resolve(__dirname, 'index.html'),
       output: {
         manualChunks: {
           react: ['react', 'react-dom'],
@@ -22,17 +24,17 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      // Optional path shortcuts if needed later
+      '@': path.resolve(__dirname, 'src'), // Alias for cleaner imports
       '@src': path.resolve(__dirname, 'src'),
       '@public': path.resolve(__dirname, 'public'),
     },
   },
   server: {
-    port: 5173, // Dev server port
-    open: true, // Auto-open browser
+    port: 5173,
+    open: true,
   },
   preview: {
-    port: 4173, // Preview server port
+    port: 4173,
     open: true,
   },
 });
