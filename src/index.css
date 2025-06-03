@@ -1,22 +1,36 @@
-/* Import custom font definitions */
+/* src/index.css */
+
+/* Import fonts */
 @import './fonts.css';
 
-/* Reset and base styles */
+/* Reset and base setup */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Arial', 'Times New Roman', 'Calibri', 'Tahoma', 'Verdana', 'Segoe UI', 'Georgia', 'Comic Sans MS', 'Courier New', sans-serif;
-  background-color: #fff;
-  color: #1a1a1a;
-  font-size: 16px;
+html, body {
+  font-family: 'Work Sans', 'Open Sans', 'Roboto', 'Arial', 'Segoe UI', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  min-height: 100vh;
   line-height: 1.6;
+  font-size: 16px;
 }
 
-/* App layout styles */
+:root {
+  --bg-color: #f9f9f9;
+  --text-color: #1a1a1a;
+  --primary-color: #4f46e5;
+  --accent-color: #4338ca;
+  --danger-color: #dc2626;
+  --font-size-base: 16px;
+  --font-size-lg: 20px;
+  --font-size-sm: 14px;
+}
+
+/* App wrapper */
 .app {
   display: flex;
   flex-direction: column;
@@ -24,28 +38,36 @@ body {
   padding: 2rem;
 }
 
-/* PDF canvas container */
+/* PDF editor layout */
 .pdf-editor {
   position: relative;
   width: 100%;
   max-width: 900px;
+  background: #fff;
+  border-radius: 6px;
+  padding: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.pdf-editor canvas {
+/* Canvas rendering */
+canvas {
+  display: block;
+  width: 100%;
   border: 1px solid #ccc;
   margin-top: 1rem;
   image-rendering: optimizeQuality;
   image-rendering: -webkit-optimize-contrast;
+  background: white;
+  border-radius: 4px;
 }
 
+/* Editable text layer overlay */
 .textLayer {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   pointer-events: auto;
   user-select: text;
+  z-index: 5;
 }
 
 .text-span {
@@ -55,12 +77,51 @@ body {
   text-shadow: 0 0 0 #000;
   font-family: inherit;
   font-size: inherit;
-  font-weight: normal;
   line-height: 1;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 1px 2px;
+  border-radius: 2px;
   cursor: text;
+  z-index: 6;
 }
 
 .text-span[contenteditable="true"]:focus {
   outline: 1px solid #007bff;
   background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Buttons */
+button {
+  padding: 0.5rem 1rem;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  background-color: var(--primary-color);
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+button:hover {
+  background-color: var(--accent-color);
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Input controls */
+input[type="file"] {
+  padding: 0.4rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+}
+
+input[type="color"] {
+  width: 40px;
+  height: 30px;
+  border: none;
+  padding: 0;
 }

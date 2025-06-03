@@ -1,115 +1,78 @@
-import React, { useState } from 'react';
+// src/components/EditableTextLayer.jsx
+import React, { useState, useRef } from "react";
 
-const EditableTextLayer = ({ onSubmit }) => {
-  const [textBoxes, setTextBoxes] = useState([]);
+const EditableTextLayer = ({ items = [], onSubmit, viewport }) => {
+  const [inputs, setInputs] = useState([]);
+  const layerRef = useRef(null);
 
-  const addTextBox = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const offset = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    };
-    setTextBoxes((prev) => [
+  const handleClick = (e) => {
+    if (e.target !== layerRef.current) return;
+
+    const rect = layerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const id = Date.now();
+
+    setInputs((prev) => [
       ...prev,
-      {
-        id: Date.now(),
-        position: offset,
-        text: ''
-      }
+      { id, x, y, value: "", editing: true }
     ]);
   };
 
-  const updatePosition = (id, x, y) => {
-    setTextBoxes((prev) =>
-      prev.map((box) =>
-        box.id === id ? { ...box, position: { x, y } } : box
-      )
+  const handleChange = (id, value) => {
+    setInputs((prev) =>
+      prev.map((input) => (input.id === id ? { ...input, value } : input))
     );
   };
 
-  const updateText = (id, text) => {
-    setTextBoxes((prev) =>
-      prev.map((box) =>
-        box.id === id ? { ...box, text } : box
-      )
+  const handleBlur = (id) => {
+    const input = inputs.find((inp) => inp.id === id);
+    if (input && input.value.trim() !== "") {
+      onSubmit(input.value, { x: input.x, y: input.y });
+    }
+
+    setInputs((prev) =>
+      prev.filter((inp) => inp.id !== id || inp.value.trim() === "")
     );
   };
 
   return (
     <div
-      onClick={addTextBox}
+      ref={layerRef}
+      className="textLayer"
       style={{
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        overflow: 'hidden'
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: viewport?.width || "100%",
+        height: viewport?.height || "100%",
+        zIndex: 5,
+        cursor: "text"
       }}
+      onClick={handleClick}
     >
-      {textBoxes.map((box) => (
-        <DraggableTextBox
-          key={box.id}
-          id={box.id}
-          text={box.text}
-          position={box.position}
-          onPositionChange={updatePosition}
-          onTextChange={updateText}
-          onSubmit={onSubmit}
+      {inputs.map((input) => (
+        <input
+          key={input.id}
+          autoFocus
+          value={input.value}
+          onChange={(e) => handleChange(input.id, e.target.value)}
+          onBlur={() => handleBlur(input.id)}
+          style={{
+            position: "absolute",
+            top: input.y,
+            left: input.x,
+            fontSize: "14px",
+            padding: "2px 4px",
+            border: "1px solid #ccc",
+            borderRadius: "2px",
+            background: "rgba(255,255,255,0.9)",
+            minWidth: "100px",
+            zIndex: 6
+          }}
         />
       ))}
-    </div>
-  );
-};
-
-const DraggableTextBox = ({
-  id,
-  text,
-  position,
-  onPositionChange,
-  onTextChange,
-  onSubmit
-}) => {
-  const [dragging, setDragging] = useState(false);
-
-  const handleDrag = (e) => {
-    const parent = e.currentTarget.parentNode.getBoundingClientRect();
-    const x = e.clientX - parent.left;
-    const y = e.clientY - parent.top;
-    onPositionChange(id, x, y);
-  };
-
-  return (
-    <div
-      onMouseDown={() => setDragging(true)}
-      onMouseUp={() => setDragging(false)}
-      onMouseMove={(e) => dragging && handleDrag(e)}
-      style={{
-        position: 'absolute',
-        left: position.x,
-        top: position.y,
-        width: 200,
-        cursor: dragging ? 'grabbing' : 'grab',
-        zIndex: 10
-      }}
-    >
-      <textarea
-        value={text}
-        onChange={(e) => onTextChange(id, e.target.value)}
-        onBlur={() => {
-          if (text.trim()) {
-            onSubmit && onSubmit(text.trim(), position);
-          }
-        }}
-        placeholder="Enter text..."
-        style={{
-          width: '100%',
-          padding: '8px',
-          fontSize: '16px',
-          border: '1px solid #ccc',
-          borderRadius: '4px',
-          backgroundColor: 'rgba(255,255,255,0.8)',
-          resize: 'none'
-        }}
-      />
     </div>
   );
 };

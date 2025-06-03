@@ -1,5 +1,5 @@
-// src/components/CameraToPdf.jsx
-import React, { useRef, useState } from "react";
+// src/components/CameraToPDF.jsx
+import React, { useRef, useState, useEffect } from "react";
 import styled from "styled-components";
 import { PDFDocument } from "pdf-lib";
 
@@ -24,18 +24,36 @@ const ButtonGroup = styled.div`
   display: flex;
   justify-content: center;
   gap: 1rem;
+  flex-wrap: wrap;
+`;
+
+const Link = styled.a`
+  margin-top: 1rem;
+  display: inline-block;
+  font-weight: bold;
+  color: #4f46e5;
 `;
 
 const CameraToPDF = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [pdfUrl, setPdfUrl] = useState(null);
+  const [stream, setStream] = useState(null);
+
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [stream]);
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      setStream(mediaStream);
       if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+        videoRef.current.srcObject = mediaStream;
         videoRef.current.play();
       }
     } catch (error) {
@@ -70,6 +88,10 @@ const CameraToPDF = () => {
 
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
+
+    // Revoke previous blob if any
+    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+
     setPdfUrl(URL.createObjectURL(blob));
   };
 
@@ -83,11 +105,9 @@ const CameraToPDF = () => {
         <button onClick={captureToPDF}>Capture PDF</button>
       </ButtonGroup>
       {pdfUrl && (
-        <p>
-          <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
-            View PDF
-          </a>
-        </p>
+        <Link href={pdfUrl} target="_blank" rel="noopener noreferrer">
+          View PDF
+        </Link>
       )}
     </Wrapper>
   );

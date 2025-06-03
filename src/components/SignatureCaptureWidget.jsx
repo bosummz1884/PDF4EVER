@@ -9,21 +9,44 @@ const CanvasWrapper = styled.div`
   border-radius: 12px;
   padding: 1rem;
   background: white;
+  max-width: 100%;
+  margin: 0 auto;
 `;
 
 const ButtonBar = styled.div`
   margin-top: 1rem;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
+  gap: 1rem;
+  flex-wrap: wrap;
 `;
 
-const SignatureCaptureWidget = ({ onSigned, onClose }) => {
+const StyledButton = styled.button`
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  background-color: #4f46e5;
+  color: white;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #4338ca;
+  }
+`;
+
+const SignatureCaptureWidget = ({
+  onSigned = () => {},
+  onClose = () => {}
+}) => {
   const sigCanvas = useRef();
 
-  const clear = () => sigCanvas.current.clear();
+  const clear = () => {
+    if (sigCanvas.current) sigCanvas.current.clear();
+  };
 
   const save = () => {
-    if (sigCanvas.current.isEmpty()) return;
+    if (!sigCanvas.current || sigCanvas.current.isEmpty()) return;
     const dataUrl = sigCanvas.current.getTrimmedCanvas().toDataURL("image/png");
     const hash = sha256(dataUrl);
     onSigned({ dataUrl, hash });
@@ -34,12 +57,16 @@ const SignatureCaptureWidget = ({ onSigned, onClose }) => {
       <SignatureCanvas
         ref={sigCanvas}
         penColor="black"
-        canvasProps={{ width: 500, height: 200, className: "sigCanvas" }}
+        canvasProps={{
+          width: 500,
+          height: 200,
+          className: "sigCanvas"
+        }}
       />
       <ButtonBar>
-        <button onClick={clear}>Clear</button>
-        <button onClick={save}>Save</button>
-        <button onClick={onClose}>Cancel</button>
+        <StyledButton onClick={clear}>Clear</StyledButton>
+        <StyledButton onClick={save}>Save</StyledButton>
+        <StyledButton onClick={onClose}>Cancel</StyledButton>
       </ButtonBar>
     </CanvasWrapper>
   );

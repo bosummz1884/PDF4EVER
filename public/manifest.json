@@ -1,0 +1,47 @@
+{
+  "name": "PDF4EVER - Edit, Merge, Sign, and Convert PDFs",
+  "short_name": "PDF4EVER",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "scope": "/",
+  "description": "Edit, merge, sign, annotate, and convert PDFs instantly from your browser with PDF4EVER.",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/editor-view.png",
+      "type": "image/png",
+      "sizes": "1200x675"
+    },
+    {
+      "src": "/screenshots/signature-capture.png",
+      "type": "image/png",
+      "sizes": "1200x675"
+    }
+  ],
+  "categories": ["productivity", "utilities", "business"],
+  "lang": "en-US"
+}

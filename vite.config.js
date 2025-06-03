@@ -2,20 +2,28 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import pages from 'vite-plugin-pages';
+import sitemap from 'vite-plugin-sitemap';
 
 export default defineConfig({
   root: '.', // Project root (where index.html is located)
   publicDir: 'public', // Static assets directory
 
-  plugins: [react()],
+  plugins: [
+    react(),
+    pages(), // auto-registers routes
+    sitemap({
+      hostname: 'https://pdf4ever.org' // required for sitemap
+    })
+  ],
 
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),         // Use "@/components/YourFile"
-      '@src': path.resolve(__dirname, 'src'),      // Optional fallback
+      '@': path.resolve(__dirname, 'src'),
+      '@src': path.resolve(__dirname, 'src'),
       '@public': path.resolve(__dirname, 'public'),
-      'components': path.resolve(__dirname, 'src/components'), // Direct alias for components
-      'utils': path.resolve(__dirname, 'src/utils')            // Direct alias for utils
+      'components': path.resolve(__dirname, 'src/components'),
+      'utils': path.resolve(__dirname, 'src/utils')
     }
   },
 

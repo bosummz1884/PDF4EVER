@@ -1,5 +1,5 @@
 // src/components/FontToolbar.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
 const ToolbarWrapper = styled.div`
@@ -7,10 +7,15 @@ const ToolbarWrapper = styled.div`
   gap: 1rem;
   align-items: center;
   margin: 1rem 0;
+  flex-wrap: wrap;
+  justify-content: center;
 `;
 
 const Label = styled.label`
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 `;
 
 const Input = styled.input`
@@ -26,36 +31,42 @@ const Select = styled.select`
 `;
 
 const FontToolbar = ({ onChange }) => {
-  const [fontSize, setFontSize] = useState(24);
-  const [fontColor, setFontColor] = useState("#000000");
+  const [size, setSize] = useState(24);
+  const [color, setColor] = useState("#000000");
+  const [family, setFamily] = useState("Helvetica");
 
-  const handleFontSizeChange = (e) => {
-    const size = parseInt(e.target.value);
-    setFontSize(size);
-    onChange({ fontSize: size, fontColor });
-  };
-
-  const handleColorChange = (e) => {
-    const color = e.target.value;
-    setFontColor(color);
-    onChange({ fontSize, fontColor: color });
-  };
+  useEffect(() => {
+    if (onChange) {
+      onChange({ size, color, family });
+    }
+  }, [size, color, family, onChange]);
 
   return (
     <ToolbarWrapper>
       <Label>
         Font Size:
-        <Select value={fontSize} onChange={handleFontSizeChange}>
-          {[12, 16, 20, 24, 28, 32, 36, 48].map((size) => (
-            <option key={size} value={size}>
-              {size}
+        <Select value={size} onChange={(e) => setSize(parseInt(e.target.value))}>
+          {[12, 14, 16, 18, 20, 24, 28, 32, 36, 48].map((s) => (
+            <option key={s} value={s}>
+              {s}px
             </option>
           ))}
         </Select>
       </Label>
+
       <Label>
         Color:
-        <Input type="color" value={fontColor} onChange={handleColorChange} />
+        <Input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
+      </Label>
+
+      <Label>
+        Font:
+        <Select value={family} onChange={(e) => setFamily(e.target.value)}>
+          <option value="Helvetica">Helvetica</option>
+          <option value="Times-Roman">Times New Roman</option>
+          <option value="Courier">Courier</option>
+          <option value="Arial">Arial</option>
+        </Select>
       </Label>
     </ToolbarWrapper>
   );
