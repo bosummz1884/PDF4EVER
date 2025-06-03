@@ -1,12 +1,17 @@
-// src/components/AnnotationCanvas.jsx
-import React, { useRef, useState, useEffect, forwardRef, useImperativeHandle } from "react";
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle
+} from "react";
 
-const AnnotationCanvas = forwardRef(({ width = 900, height = 1200 }, ref) => {
+const AnnotationCanvas = forwardRef(({ width = 900, height = 1200, onCapture }, ref) => {
   const canvasRef = useRef(null);
   const [drawing, setDrawing] = useState(false);
   const [lastPoint, setLastPoint] = useState(null);
 
-  const strokeColor = "red";
+  const strokeColor = "#ff0000";
   const strokeWidth = 2.5;
 
   useEffect(() => {
@@ -58,9 +63,17 @@ const AnnotationCanvas = forwardRef(({ width = 900, height = 1200 }, ref) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
 
-  const getAnnotationImage = () => {
+  const captureImage = () => {
     const canvas = canvasRef.current;
-    return canvas.toDataURL("image/png");
+    canvas.toBlob((blob) => {
+      if (onCapture && blob) {
+        onCapture(blob);
+      }
+    }, "image/png");
+  };
+
+  const getAnnotationImage = () => {
+    return canvasRef.current.toDataURL("image/png");
   };
 
   useImperativeHandle(ref, () => ({
@@ -69,16 +82,7 @@ const AnnotationCanvas = forwardRef(({ width = 900, height = 1200 }, ref) => {
   }));
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width,
-        height,
-        zIndex: 4
-      }}
-    >
+    <div style={{ position: "absolute", top: 0, left: 0, width, height, zIndex: 4 }}>
       <canvas
         ref={canvasRef}
         onMouseDown={startDrawing}
@@ -91,11 +95,14 @@ const AnnotationCanvas = forwardRef(({ width = 900, height = 1200 }, ref) => {
         style={{
           width: "100%",
           height: "100%",
-          border: "1px solid transparent",
           backgroundColor: "transparent",
           cursor: "crosshair"
         }}
       />
+      <div style={{ position: "absolute", top: 10, right: 10, zIndex: 5 }}>
+        <button onClick={clearCanvas} style={{ marginRight: "10px" }}>Clear</button>
+        <button onClick={captureImage}>Save</button>
+      </div>
     </div>
   );
 });
