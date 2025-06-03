@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import styled from "styled-components";
-
+import Editor from "@/pages/editor";
 import PDFTextEditor from "./components/PDFTextEditor.jsx";
 import PDFMerger from "./components/PDFMerger.jsx";
 import FontToolbar from "./components/FontToolbar.jsx";
@@ -80,6 +80,7 @@ const App = () => {
             </>
           }
         />
+        <Route path="/editor" component={Editor} />
         <Route path="/merge" element={<PDFMerger />} />
         <Route path="/camera" element={<CameraToPDF />} />
       </Routes>

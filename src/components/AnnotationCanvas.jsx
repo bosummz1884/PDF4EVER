@@ -1,7 +1,7 @@
 // src/components/AnnotationCanvas.jsx
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, forwardRef, useImperativeHandle } from "react";
 
-export default function AnnotationCanvas({ onCapture, width = 900, height = 1200 }) {
+const AnnotationCanvas = forwardRef(({ width = 900, height = 1200 }, ref) => {
   const canvasRef = useRef(null);
   const [drawing, setDrawing] = useState(false);
   const [lastPoint, setLastPoint] = useState(null);
@@ -58,20 +58,15 @@ export default function AnnotationCanvas({ onCapture, width = 900, height = 1200
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
 
-  const captureCanvas = () => {
+  const getAnnotationImage = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    canvas.toBlob((blob) => {
-      if (blob && onCapture) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const imageData = new Uint8Array(reader.result);
-          onCapture(imageData);
-        };
-        reader.readAsArrayBuffer(blob);
-      }
-    }, "image/png");
+    return canvas.toDataURL("image/png");
   };
+
+  useImperativeHandle(ref, () => ({
+    getAnnotationImage,
+    clearCanvas
+  }));
 
   return (
     <div
@@ -101,12 +96,8 @@ export default function AnnotationCanvas({ onCapture, width = 900, height = 1200
           cursor: "crosshair"
         }}
       />
-      <div style={{ position: "absolute", top: 10, right: 10, zIndex: 10 }}>
-        <button onClick={clearCanvas}>Clear</button>
-        <button onClick={captureCanvas} style={{ marginLeft: "10px" }}>
-          Save
-        </button>
-      </div>
     </div>
   );
-}
+});
+
+export default AnnotationCanvas;

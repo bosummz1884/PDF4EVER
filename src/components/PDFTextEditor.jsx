@@ -1,5 +1,5 @@
 // src/components/PDFTextEditor.jsx
-import React, { useRef, useEffect, useState, forwardRef, useImperativeHandle } from "react";
+import React, { useRef, useEffect, useState, useImperativeHandle, forwardRef } from "react";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist/build/pdf";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker?worker";
@@ -15,6 +15,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
 const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
   const canvasRef = useRef(null);
+  const annotationRef = useRef();
+
   const [pdfData, setPdfData] = useState(null);
   const [pdfDoc, setPdfDoc] = useState(null);
   const [textItems, setTextItems] = useState([]);
@@ -23,10 +25,6 @@ const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [zoom, setZoom] = useState(1.5);
-
-  useImperativeHandle(ref, () => ({
-    exportPDF: handleSave
-  }));
 
   useEffect(() => {
     if (!file) return;
@@ -67,39 +65,49 @@ const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
     setUserTextBoxes((prev) => [...prev, { text, position, page: currentPage }]);
   };
 
-  const hexToRgb = (hex) => {
-    const bigint = parseInt(hex.replace("#", ""), 16);
-    return {
-      r: ((bigint >> 16) & 255) / 255,
-      g: ((bigint >> 8) & 255) / 255,
-      b: (bigint & 255) / 255,
-    };
-  };
-
-  const handleSave = async () => {
+  const exportPDF = async () => {
     if (!pdfData || !viewport) return;
 
     const pdfDoc = await PDFDocument.load(pdfData);
     const pages = pdfDoc.getPages();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
+    // Add text
     userTextBoxes.forEach(({ text, position, page }) => {
       const pg = pages[page - 1];
-      const color = hexToRgb(fontOptions.color || "#000000");
       pg.drawText(text, {
         x: position.x,
         y: viewport.height - position.y - 20,
         size: fontOptions.size || 14,
         font,
-        color: rgb(color.r, color.g, color.b),
+        color: rgb(0, 0, 0),
       });
     });
+
+    // Add annotations
+    if (annotationRef.current?.getAnnotationImage) {
+      const imgBytes = await annotationRef.current.getAnnotationImage();
+      if (imgBytes) {
+        const image = await pdfDoc.embedPng(imgBytes);
+        const pg = pages[currentPage - 1];
+        pg.drawImage(image, {
+          x: 0,
+          y: 0,
+          width: viewport.width,
+          height: viewport.height,
+        });
+      }
+    }
 
     const modifiedBytes = await pdfDoc.save();
     const blob = new Blob([modifiedBytes], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
     window.open(url);
   };
+
+  useImperativeHandle(ref, () => ({
+    exportPDF,
+  }));
 
   return (
     <div
@@ -133,6 +141,8 @@ const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
             onSubmit={handleTextSubmit}
             viewport={viewport}
           />
+          <AnnotationCanvas ref={annotationRef} width={viewport.width} height={viewport.height} />
+          <SignatureCaptureWidget onSigned={(data) => console.log("Signature:", data)} onClose={() => {}} />
         </>
       )}
     </div>
