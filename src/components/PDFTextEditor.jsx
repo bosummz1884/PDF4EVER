@@ -1,5 +1,5 @@
 // src/components/PDFTextEditor.jsx
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist/build/pdf";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker?worker";
@@ -9,12 +9,11 @@ import EditableTextLayer from "./EditableTextLayer.jsx";
 import SignatureCaptureWidget from "./SignatureCaptureWidget.jsx";
 import PDFViewerControls from "./PDFViewerControls.jsx";
 
-// Configure PDF.js worker
 const workerBlob = new Blob([pdfjsWorker], { type: "application/javascript" });
 const workerUrl = URL.createObjectURL(workerBlob);
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
-const PDFTextEditor = ({ file, fontOptions = {} }) => {
+const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
   const canvasRef = useRef(null);
   const [pdfData, setPdfData] = useState(null);
   const [pdfDoc, setPdfDoc] = useState(null);
@@ -24,6 +23,10 @@ const PDFTextEditor = ({ file, fontOptions = {} }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [zoom, setZoom] = useState(1.5);
+
+  useImperativeHandle(ref, () => ({
+    exportPDF: handleSave
+  }));
 
   useEffect(() => {
     if (!file) return;
@@ -64,6 +67,15 @@ const PDFTextEditor = ({ file, fontOptions = {} }) => {
     setUserTextBoxes((prev) => [...prev, { text, position, page: currentPage }]);
   };
 
+  const hexToRgb = (hex) => {
+    const bigint = parseInt(hex.replace("#", ""), 16);
+    return {
+      r: ((bigint >> 16) & 255) / 255,
+      g: ((bigint >> 8) & 255) / 255,
+      b: (bigint & 255) / 255,
+    };
+  };
+
   const handleSave = async () => {
     if (!pdfData || !viewport) return;
 
@@ -73,12 +85,13 @@ const PDFTextEditor = ({ file, fontOptions = {} }) => {
 
     userTextBoxes.forEach(({ text, position, page }) => {
       const pg = pages[page - 1];
+      const color = hexToRgb(fontOptions.color || "#000000");
       pg.drawText(text, {
         x: position.x,
         y: viewport.height - position.y - 20,
         size: fontOptions.size || 14,
         font,
-        color: rgb(0, 0, 0),
+        color: rgb(color.r, color.g, color.b),
       });
     });
 
@@ -120,16 +133,10 @@ const PDFTextEditor = ({ file, fontOptions = {} }) => {
             onSubmit={handleTextSubmit}
             viewport={viewport}
           />
-          <AnnotationCanvas width={viewport.width} height={viewport.height} />
-          <SignatureCaptureWidget onSigned={(data) => console.log("Signature:", data)} onClose={() => {}} />
         </>
       )}
-
-      <button onClick={handleSave} style={{ marginTop: "1rem" }}>
-        Save PDF
-      </button>
     </div>
   );
-};
+});
 
 export default PDFTextEditor;
