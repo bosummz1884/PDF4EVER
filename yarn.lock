@@ -885,9 +885,11 @@ __metadata:
   dependencies:
     "@vitejs/plugin-react": ^4.5.0
     blob-stream: ^0.1.3
+    clsx: ^2.1.1
     file-saver: ^2.0.5
     html2canvas: ^1.4.1
     js-sha256: ^0.11.1
+    lucide-react: ^0.512.0
     opentype.js: ^1.3.4
     path: ^0.12.7
     pdf-lib: ^1.17.1
@@ -1057,6 +1059,13 @@ __metadata:
   version: 3.0.0
   resolution: "chownr@npm:3.0.0"
   checksum: fd73a4bab48b79e66903fe1cafbdc208956f41ea4f856df883d0c7277b7ab29fd33ee65f93b2ec9192fc0169238f2f8307b7735d27c155821d886b84aa97aa8d
+  languageName: node
+  linkType: hard
+
+"clsx@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "clsx@npm:2.1.1"
+  checksum: acd3e1ab9d8a433ecb3cc2f6a05ab95fe50b4a3cfc5ba47abb6cbf3754585fcb87b84e90c822a1f256c4198e3b41c7f6c391577ffc8678ad587fc0976b24fd57
   languageName: node
   linkType: hard
 
@@ -1643,6 +1652,15 @@ __metadata:
   dependencies:
     yallist: ^3.0.2
   checksum: c154ae1cbb0c2206d1501a0e94df349653c92c8cbb25236d7e85190bcaf4567a03ac6eb43166fabfa36fd35623694da7233e88d9601fbf411a9a481d85dbd2cb
+  languageName: node
+  linkType: hard
+
+"lucide-react@npm:^0.512.0":
+  version: 0.512.0
+  resolution: "lucide-react@npm:0.512.0"
+  peerDependencies:
+    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: a0e377307caa1cd08716d33778568c51a7a2c957447e555bfca8205650988d39deca7855d806b1e614f54e3f8fe2f71b6002c2faba4f15f04b00d8b21e1a7803
   languageName: node
   linkType: hard
 
