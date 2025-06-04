@@ -1,5 +1,11 @@
 // src/components/PDFTextEditor.jsx
-import React, { useRef, useEffect, useState, useImperativeHandle, forwardRef } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist/build/pdf";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker?worker";
@@ -62,7 +68,19 @@ const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
   };
 
   const handleTextSubmit = (text, position) => {
-    setUserTextBoxes((prev) => [...prev, { text, position, page: currentPage }]);
+    setUserTextBoxes((prev) => [
+      ...prev,
+      {
+        text,
+        position,
+        page: currentPage,
+        style: {
+          size: fontOptions.size || 14,
+          color: fontOptions.color || "#000000",
+          family: fontOptions.family || "Helvetica",
+        },
+      },
+    ]);
   };
 
   const exportPDF = async () => {
@@ -70,21 +88,21 @@ const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
 
     const pdfDoc = await PDFDocument.load(pdfData);
     const pages = pdfDoc.getPages();
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-    // Add text
-    userTextBoxes.forEach(({ text, position, page }) => {
-      const pg = pages[page - 1];
-      pg.drawText(text, {
-        x: position.x,
-        y: viewport.height - position.y - 20,
-        size: fontOptions.size || 14,
+    for (const box of userTextBoxes) {
+      const pg = pages[box.page - 1];
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica); // You can replace with dynamic font loading later
+      const colorRgb = hexToRgb(box.style.color);
+
+      pg.drawText(box.text, {
+        x: box.position.x,
+        y: viewport.height - box.position.y - 20,
+        size: box.style.size,
         font,
-        color: rgb(0, 0, 0),
+        color: rgb(colorRgb.r / 255, colorRgb.g / 255, colorRgb.b / 255),
       });
-    });
+    }
 
-    // Add annotations
     if (annotationRef.current?.getAnnotationImage) {
       const imgBytes = await annotationRef.current.getAnnotationImage();
       if (imgBytes) {
@@ -105,6 +123,15 @@ const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
     window.open(url);
   };
 
+  const hexToRgb = (hex) => {
+    const bigint = parseInt(hex.replace("#", ""), 16);
+    return {
+      r: (bigint >> 16) & 255,
+      g: (bigint >> 8) & 255,
+      b: bigint & 255,
+    };
+  };
+
   useImperativeHandle(ref, () => ({
     exportPDF,
   }));
@@ -119,7 +146,7 @@ const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
         background: "#fff",
         padding: "10px",
         borderRadius: "6px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
+        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
       }}
     >
       <PDFViewerControls
@@ -140,9 +167,17 @@ const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
             items={textItems}
             onSubmit={handleTextSubmit}
             viewport={viewport}
+            fontOptions={fontOptions}
           />
-          <AnnotationCanvas ref={annotationRef} width={viewport.width} height={viewport.height} />
-          <SignatureCaptureWidget onSigned={(data) => console.log("Signature:", data)} onClose={() => {}} />
+          <AnnotationCanvas
+            ref={annotationRef}
+            width={viewport.width}
+            height={viewport.height}
+          />
+          <SignatureCaptureWidget
+            onSigned={(data) => console.log("Signature:", data)}
+            onClose={() => {}}
+          />
         </>
       )}
     </div>

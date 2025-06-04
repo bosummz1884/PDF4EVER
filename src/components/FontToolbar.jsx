@@ -9,6 +9,10 @@ const ToolbarWrapper = styled.div`
   margin: 1rem 0;
   flex-wrap: wrap;
   justify-content: center;
+  background-color: #1f2937;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 `;
 
 const Label = styled.label`
@@ -16,6 +20,7 @@ const Label = styled.label`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  color: #f3f4f6;
 `;
 
 const Input = styled.input`
@@ -66,6 +71,8 @@ const FontToolbar = ({ onChange }) => {
           <option value="Times-Roman">Times New Roman</option>
           <option value="Courier">Courier</option>
           <option value="Arial">Arial</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Verdana">Verdana</option>
         </Select>
       </Label>
     </ToolbarWrapper>
