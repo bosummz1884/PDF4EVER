@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://pdf4ever.org/sitemap.xml
