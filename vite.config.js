@@ -4,16 +4,29 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import pages from 'vite-plugin-pages';
 import sitemap from 'vite-plugin-sitemap';
+import fs from 'fs';
 
 export default defineConfig({
-  root: '.', // Project root (where index.html is located)
-  publicDir: 'public', // Static assets directory
+  root: '.',
+  publicDir: 'public',
 
   plugins: [
     react(),
-    pages(), // auto-registers routes
+    pages(),
+
+    // Safe wrapper to create dist/ before sitemap runs
+    {
+      name: 'prepare-dist-before-sitemap',
+      closeBundle() {
+        const distPath = path.resolve(__dirname, 'dist');
+        if (!fs.existsSync(distPath)) {
+          fs.mkdirSync(distPath, { recursive: true });
+        }
+      }
+    },
+
     sitemap({
-      hostname: 'https://pdf4ever.org' // required for sitemap
+      hostname: 'https://pdf4ever.org'
     })
   ],
 

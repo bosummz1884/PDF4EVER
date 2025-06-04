@@ -2,16 +2,13 @@
 import React, { useState } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import styled from "styled-components";
-
-import HomePage from "./pages/home.jsx";
 import PDFTextEditor from "./components/PDFTextEditor.jsx";
 import PDFMerger from "./components/PDFMerger.jsx";
 import FontToolbar from "./components/FontToolbar.jsx";
 import AnnotationToolbar from "./components/AnnotationToolbar.jsx";
-import SignatureCaptureWidget from "./components/SignatureCaptureWidget.jsx";
 import CameraToPDF from "./components/CameraToPDF.jsx";
-import Editor from "./pages/editor.jsx";
 
+import "./global.css";
 import "./index.css";
 
 const Wrapper = styled.div`
@@ -52,9 +49,7 @@ const App = () => {
 
   return (
     <Routes>
-      {/* Landing Page (Replit visuals) */}
-      <Route path="/" element={<HomePage />} />
-
+     
       {/* PDF Editor */}
       <Route
         path="/editor"
