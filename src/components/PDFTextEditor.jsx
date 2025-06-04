@@ -112,8 +112,8 @@ const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
         pg.drawImage(image, {
           x: 0,
           y: 0,
-          width: viewport.width,
-          height: viewport.height,
+          inline,size: viewport.width,
+          block,size: viewport.height,
         });
       }
     }
@@ -142,7 +142,7 @@ const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
       className="pdf-editor"
       style={{
         position: "relative",
-        maxWidth: "900px",
+        maxinline,size: "900px",
         margin: "0 auto",
         background: "#fff",
         padding: "10px",

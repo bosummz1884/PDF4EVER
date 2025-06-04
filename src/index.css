@@ -14,7 +14,7 @@ html, body {
   font-family: 'Work Sans', 'Open Sans', 'Roboto', 'Arial', 'Segoe UI', sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
-  min-height: 100vh;
+  min-block-size: 100vh;
   line-height: 1.6;
   font-size: 16px;
 }
@@ -41,8 +41,8 @@ html, body {
 /* PDF editor layout */
 .pdf-editor {
   position: relative;
-  width: 100%;
-  max-width: 900px;
+  inline-size: 100%;
+  max-inline-size: 900px;
   background: #fff;
   border-radius: 6px;
   padding: 1rem;
@@ -52,9 +52,9 @@ html, body {
 /* Canvas rendering */
 canvas {
   display: block;
-  width: 100%;
+  inline-size: 100%;
   border: 1px solid #ccc;
-  margin-top: 1rem;
+  margin-block-start: 1rem;
   image-rendering: optimizeQuality;
   image-rendering: -webkit-optimize-contrast;
   background: white;
@@ -64,7 +64,7 @@ canvas {
 /* Editable text layer overlay */
 .textLayer {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  inset-block-start: 0; inset-inline-start: 0; inset-inline-end: 0; inset-block-end: 0;
   pointer-events: auto;
   user-select: text;
   z-index: 5;
@@ -116,12 +116,12 @@ button:disabled {
 input[type="file"] {
   padding: 0.4rem;
   border-radius: 4px;
-  margin-top: 1rem;
+  margin-block-start: 1rem;
 }
 
 input[type="color"] {
-  width: 40px;
-  height: 30px;
+  inline-size: 40px;
+  block-size: 30px;
   border: none;
   padding: 0;
 }
