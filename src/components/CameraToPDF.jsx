@@ -9,8 +9,8 @@ const Wrapper = styled.div`
 `;
 
 const Video = styled.video`
-  inline-size: 100%;
-  max-inline-size: 600px;
+  width: 100%;
+  max-width: 600px;
   border: 2px solid #ccc;
   border-radius: 10px;
 `;
@@ -20,7 +20,7 @@ const Canvas = styled.canvas`
 `;
 
 const ButtonGroup = styled.div`
-  margin-block-start: 1rem;
+  margin-top: 1rem;
   display: flex;
   justify-content: center;
   gap: 1rem;
@@ -28,7 +28,7 @@ const ButtonGroup = styled.div`
 `;
 
 const Link = styled.a`
-  margin-block-start: 1rem;
+  margin-top: 1rem;
   display: inline-block;
   font-weight: bold;
   color: #4f46e5;
@@ -82,8 +82,8 @@ const CameraToPDF = () => {
     page.drawImage(pngImage, {
       x: 0,
       y: 0,
-      inline,size: pngImage.width,
-      block,size: pngImage.height,ght,
+      width: pngImage.width,
+      height: pngImage.height,
     });
 
     const pdfBytes = await pdfDoc.save();

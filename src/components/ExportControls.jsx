@@ -20,8 +20,8 @@ const ExportControls = ({ onExport, onToggleSignature, onClearAnnotations }) => 
 const styles = {
   container: {
     position: "absolute",
-    inset,block,start: 10,
-    inset,inline,end: 10,
+    insetBlockStart: 10,
+    insetInlineEnd: 10,
     display: "flex",
     gap: "0.5rem",
     zIndex: 20,

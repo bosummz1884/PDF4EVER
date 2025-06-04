@@ -112,8 +112,8 @@ const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
         pg.drawImage(image, {
           x: 0,
           y: 0,
-          inline,size: viewport.width,
-          block,size: viewport.height,
+          width: viewport.width,
+          height: viewport.height,
         });
       }
     }

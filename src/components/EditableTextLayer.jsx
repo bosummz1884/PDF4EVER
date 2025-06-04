@@ -56,10 +56,10 @@ const EditableTextLayer = ({ items = [], onSubmit, viewport, fontOptions = {} })
       className="textLayer"
       style={{
         position: "absolute",
-        inset,block,start: 0,
-        inset,inline,start: 0,
-        inline,size: viewport?.width || "100%",
-        block,size: viewport?.height || "100%",
+        top: 0,
+        left: 0,
+        width: viewport?.width || "100%",
+        height: viewport?.height || "100%",
         zIndex: 5,
         cursor: "text",
       }}
@@ -74,8 +74,8 @@ const EditableTextLayer = ({ items = [], onSubmit, viewport, fontOptions = {} })
           onBlur={() => handleBlur(input.id)}
           style={{
             position: "absolute",
-            inset,block,start: input.y,
-            inset,inline,start: input.x,
+            insetBlockStart: input.y,
+            insetInlineEnd: input.x,
             fontSize: `${input.style.fontSize}px`,
             color: input.style.color,
             fontFamily: input.style.fontFamily,
@@ -83,7 +83,7 @@ const EditableTextLayer = ({ items = [], onSubmit, viewport, fontOptions = {} })
             border: "1px solid #ccc",
             borderRadius: "2px",
             background: "rgba(255,255,255,0.95)",
-            mininline,size: "100px",
+            minWidth: "100px",
             zIndex: 6,
           }}
         />

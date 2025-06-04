@@ -22,19 +22,19 @@ const Landing = () => {
 const styles = {
   container: {
     textAlign: 'center',
-    paddinginset,block,start: '20vh',
+    paddingTop: '20vh',
     background: 'radial-gradient(circle at center, #1f2937, #111827)',
     color: '#f9fafb',
-    block,size: '100vh',
+    height: '100vh',
   },
   header: {
     fontSize: '3.5rem',
-    margininset,block,end: '1rem',
+    marginBottom: '1rem',
     fontWeight: 'bold',
   },
   subhead: {
     fontSize: '1.5rem',
-    margininset,block,end: '2rem',
+    marginBottom: '2rem',
     color: '#9ca3af',
   },
   buttonGroup: {

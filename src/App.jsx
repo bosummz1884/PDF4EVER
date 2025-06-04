@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import styled from "styled-components";
 
-import Landing from "./components/Landing.jsx";
+import HomePage from "./pages/home.jsx";
 import PDFTextEditor from "./components/PDFTextEditor.jsx";
 import PDFMerger from "./components/PDFMerger.jsx";
 import FontToolbar from "./components/FontToolbar.jsx";
@@ -52,10 +52,10 @@ const App = () => {
 
   return (
     <Routes>
-      {/* Landing Page */}
-      <Route path="/" element={<Landing />} />
+      {/* Landing Page (Replit visuals) */}
+      <Route path="/" element={<HomePage />} />
 
-      {/* PDF Editor Interface */}
+      {/* PDF Editor */}
       <Route
         path="/editor"
         element={
@@ -86,7 +86,7 @@ const App = () => {
         }
       />
 
-      {/* Other Tools */}
+      {/* Additional Tools */}
       <Route path="/merge" element={<PDFMerger />} />
       <Route path="/camera" element={<CameraToPDF />} />
     </Routes>
