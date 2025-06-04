@@ -1,30 +1,22 @@
-// src/components/ThemeToggle.jsx
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { Sun, Moon } from "lucide-react";
+import { useTheme } from "./ThemeProvider"; // Make sure path is correct
 
 const ThemeToggle = () => {
-  const [theme, setTheme] = useState("light");
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    const initialTheme = savedTheme || "light";
-    setTheme(initialTheme);
-    document.documentElement.classList.toggle("dark", initialTheme === "dark");
-  }, []);
+  const { theme, setTheme } = useTheme();
 
   const toggleTheme = () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
+    if (theme === "dark") setTheme("light");
+    else setTheme("dark");
   };
 
   return (
     <button
       onClick={toggleTheme}
-      className="rounded px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
-      title="Toggle theme"
+      className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+      aria-label="Toggle Theme"
     >
-      {theme === "dark" ? "🌙" : "☀️"}
+      {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
     </button>
   );
 };
