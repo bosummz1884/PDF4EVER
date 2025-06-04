@@ -1,6 +1,6 @@
 // src/components/Header.jsx
 import React from "react";
-import ThemeToggle from "./ThemeToggle.jsx";
+import ThemeToggle from "../components/ThemeToggle.jsx";
 
 const Header = () => {
   return (
