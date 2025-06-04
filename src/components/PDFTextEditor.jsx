@@ -1,4 +1,3 @@
-// src/components/PDFTextEditor.jsx
 import React, {
   useRef,
   useEffect,
@@ -10,6 +9,7 @@ import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist/build/pdf";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker?worker";
 
+import ExportControls from "./ExportControls.jsx";
 import AnnotationCanvas from "./AnnotationCanvas.jsx";
 import EditableTextLayer from "./EditableTextLayer.jsx";
 import SignatureCaptureWidget from "./SignatureCaptureWidget.jsx";
@@ -31,6 +31,7 @@ const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [zoom, setZoom] = useState(1.5);
+  const [showSignature, setShowSignature] = useState(false);
 
   useEffect(() => {
     if (!file) return;
@@ -91,7 +92,7 @@ const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
 
     for (const box of userTextBoxes) {
       const pg = pages[box.page - 1];
-      const font = await pdfDoc.embedFont(StandardFonts.Helvetica); // You can replace with dynamic font loading later
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const colorRgb = hexToRgb(box.style.color);
 
       pg.drawText(box.text, {
@@ -149,6 +150,16 @@ const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
         boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
       }}
     >
+      <ExportControls
+        onExport={exportPDF}
+        onToggleSignature={() => setShowSignature((prev) => !prev)}
+        onClearAnnotations={() => {
+          if (annotationRef.current?.clear) {
+            annotationRef.current.clear();
+          }
+        }}
+      />
+
       <PDFViewerControls
         currentPage={currentPage}
         totalPages={totalPages}
@@ -174,10 +185,12 @@ const PDFTextEditor = forwardRef(({ file, fontOptions = {} }, ref) => {
             width={viewport.width}
             height={viewport.height}
           />
-          <SignatureCaptureWidget
-            onSigned={(data) => console.log("Signature:", data)}
-            onClose={() => {}}
-          />
+          {showSignature && (
+            <SignatureCaptureWidget
+              onSigned={(data) => console.log("Signature:", data)}
+              onClose={() => setShowSignature(false)}
+            />
+          )}
         </>
       )}
     </div>
