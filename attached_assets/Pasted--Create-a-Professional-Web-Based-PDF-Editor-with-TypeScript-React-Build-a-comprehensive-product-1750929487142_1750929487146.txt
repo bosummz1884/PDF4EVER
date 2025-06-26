@@ -1,0 +1,208 @@
+# Create a Professional Web-Based PDF Editor with TypeScript/React
+
+Build a comprehensive, production-ready PDF editor web application using the following specifications:
+
+## Tech Stack Requirements
+- **Frontend**: React 18+ with TypeScript
+- **Build Tool**: Vite
+- **Package Manager**: npm
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **State Management**: Zustand for global state, React Query for server state
+- **PDF Processing**: PDF-lib, React-PDF, PDF.js
+- **File Handling**: React-Dropzone
+- **Icons**: Lucide React
+- **Deployment Target**: Render.com
+
+## Project Structure
+Create the following folder structure with proper TypeScript definitions:
+
+```
+src/
+├── components/
+│   ├── ui/              # shadcn/ui base components
+│   ├── pdf/             # PDF-specific components
+│   ├── toolbar/         # Toolbar and menu components
+│   ├── panels/          # Side panels (thumbnails, bookmarks, etc.)
+│   ├── modals/          # Modal dialogs
+│   └── forms/           # Form components
+├── hooks/               # Custom React hooks
+├── stores/              # Zustand stores
+├── types/               # TypeScript type definitions
+├── utils/               # Utility functions
+├── services/            # API and external service integrations
+├── lib/                 # Third-party library configurations
+└── assets/              # Static assets
+```
+
+## Core Features to Implement
+
+### 1. PDF File Management
+- **Components**: `FileUploader`, `FileManager`, `CloudStorageConnector`
+- **Types**: `PDFFile`, `FileSource`, `UploadProgress`
+- **Features**: Drag-and-drop, batch upload, cloud integration (Google Drive, Dropbox, OneDrive), password-protected files, recent files list
+
+### 2. PDF Viewer & Navigation
+- **Components**: `PDFViewer`, `ThumbnailPanel`, `OutlinePanel`, `MiniMap`
+- **Types**: `ViewerState`, `NavigationMode`, `ZoomLevel`
+- **Features**: Responsive viewer, thumbnail navigation, outline/bookmarks, mini-map, keyboard shortcuts
+
+### 3. Export & Save System
+- **Components**: `ExportDialog`, `SaveManager`, `FormatSelector`
+- **Types**: `ExportFormat`, `ExportOptions`, `CompressionSettings`
+- **Features**: Multiple export formats (PDF/A, PDF/X, images, Word, Excel, HTML, text), batch export, compression, cloud save
+
+### 4. Page Management
+- **Components**: `PageManager`, `PageThumbnailGrid`, `PageReorderTool`
+- **Types**: `Page`, `PageOperation`, `PageLayout`
+- **Features**: Add/delete/duplicate pages, drag-and-drop reordering, batch operations, undo/redo
+
+### 5. Document Splitting & Merging
+- **Components**: `SplitTool`, `MergeTool`, `ExtractTool`
+- **Types**: `SplitOptions`, `MergeOperation`, `ExtractRange`
+- **Features**: Split by pages/bookmarks/patterns, merge multiple PDFs, extract page ranges
+
+### 6. Annotation System
+- **Components**: `AnnotationToolbar`, `TextTool`, `ShapeTool`, `HighlightTool`, `StickyNoteTool`
+- **Types**: `Annotation`, `AnnotationType`, `AnnotationStyle`
+- **Features**: Text boxes, highlights, shapes, sticky notes, rich text, opacity control, layering
+
+### 7. Image Processing
+- **Components**: `ImageEditor`, `ImageInserter`, `ImageConverter`
+- **Types**: `ImageOperation`, `ConversionSettings`, `ImageFormat`
+- **Features**: Insert/edit images, image-to-PDF conversion, PDF-to-image export, crop/resize/compress
+
+### 8. Form Management
+- **Components**: `FormDetector`, `FormFiller`, `FormEditor`
+- **Types**: `FormField`, `FormData`, `ValidationRule`
+- **Features**: Auto-detect forms, fill forms, flatten forms, validation, CSV/JSON import/export
+
+### 9. Text & OCR Processing
+- **Components**: `TextEditor`, `SearchReplace`, `OCRProcessor`
+- **Types**: `TextSelection`, `OCRResult`, `SearchOptions`
+- **Features**: Text editing, search/replace, OCR for scanned documents, multiple languages
+
+### 10. Digital Signatures
+- **Components**: `SignaturePad`, `SignatureManager`, `CertificateValidator`
+- **Types**: `Signature`, `SignatureType`, `Certificate`
+- **Features**: Draw/type/upload signatures, tamper detection, batch signing
+
+### 11. Security & Permissions
+- **Components**: `EncryptionDialog`, `PermissionsManager`, `RedactionTool`
+- **Types**: `SecuritySettings`, `Permission`, `RedactionArea`
+- **Features**: Password protection, permission restrictions, content redaction
+
+### 12. Document Metadata
+- **Components**: `MetadataEditor`, `PropertiesPanel`, `AttachmentManager`
+- **Types**: `DocumentMetadata`, `Attachment`, `FontInfo`
+- **Features**: Edit properties, manage attachments, font detection/embedding
+
+### 13. Advanced Tools
+- **Components**: `WatermarkTool`, `HeaderFooterEditor`, `StampLibrary`, `TableExtractor`
+- **Types**: `Watermark`, `HeaderFooter`, `Stamp`, `TableData`
+- **Features**: Watermarks, headers/footers, stamps, table extraction, Bates numbering
+
+### 14. Comparison & Analysis
+- **Components**: `PDFComparator`, `DifferenceHighlighter`
+- **Types**: `ComparisonResult`, `Difference`, `ComparisonMode`
+- **Features**: Visual/textual PDF comparison, difference highlighting
+
+### 15. Batch Operations
+- **Components**: `BatchProcessor`, `OperationQueue`, `ProgressTracker`
+- **Types**: `BatchOperation`, `QueueItem`, `ProcessingStatus`
+- **Features**: Bulk operations across multiple PDFs, progress tracking
+
+## State Management Structure
+
+### Zustand Stores to Create:
+1. `usePDFStore` - Current PDF document state
+2. `useUIStore` - UI state (panels, modals, toolbar)
+3. `useAnnotationStore` - Annotation management
+4. `useHistoryStore` - Undo/redo operations
+5. `useFileStore` - File management and recent files
+6. `useSettingsStore` - User preferences and settings
+
+## Custom Hooks to Implement:
+- `usePDFViewer` - PDF viewing logic
+- `useAnnotations` - Annotation management
+- `useFileOperations` - File upload/download/save
+- `useUndoRedo` - History management
+- `usePDFOperations` - PDF manipulation operations
+- `useKeyboardShortcuts` - Keyboard navigation
+- `useCloudStorage` - Cloud integration
+- `useBatchOperations` - Bulk processing
+
+## Required npm Dependencies:
+```json
+{
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-pdf": "^7.5.1",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^3.11.174",
+    "react-dropzone": "^14.2.3",
+    "zustand": "^4.4.7",
+    "@tanstack/react-query": "^5.8.4",
+    "lucide-react": "^0.294.0",
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^2.0.0",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "@radix-ui/react-tabs": "^1.0.4",
+    "@radix-ui/react-slider": "^1.1.2",
+    "fabric": "^5.3.0",
+    "html2canvas": "^1.4.1",
+    "file-saver": "^2.0.5",
+    "mammoth": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@types/file-saver": "^2.0.7",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8"
+  }
+}
+```
+
+## Implementation Requirements:
+
+1. **Create all TypeScript interfaces** for every data structure
+2. **Implement proper error handling** with try-catch blocks and error boundaries
+3. **Add loading states** for all async operations
+4. **Include accessibility features** (ARIA labels, keyboard navigation)
+5. **Implement responsive design** that works on mobile and desktop
+6. **Add comprehensive commenting** to all components and functions
+7. **Create reusable utility functions** for common PDF operations
+8. **Implement proper file validation** and security checks
+9. **Add progress indicators** for long-running operations
+10. **Include keyboard shortcuts** for power users
+
+## Main App Structure:
+Create a main layout with:
+- Header with file operations and main toolbar
+- Left sidebar with thumbnails and outline
+- Center area with PDF viewer
+- Right sidebar with properties and tools
+- Bottom status bar with page info and zoom controls
+- Modal system for dialogs and settings
+
+## Deployment Configuration:
+Include proper Vite configuration for Render.com deployment with:
+- Correct build settings
+- Environment variable handling
+- Static file serving
+- Proper routing configuration
+
+Generate all the necessary files, components, types, hooks, and utilities with proper TypeScript definitions. Each component should have its own file with clear separation of concerns. Include placeholder implementations for all functions to provide a complete foundation for development.
+
+**Important**: Create stub implementations for all features - don't leave any empty files. Each component should have basic structure, props interfaces, and placeholder functionality that can be expanded upon.
