@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { UIState, ViewMode, Tool, ToolType } from '@/types';
+import { UIState, ViewMode, Tool } from '@/types';
 
 interface UIStore extends UIState {
   // Actions

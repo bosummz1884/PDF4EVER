@@ -142,7 +142,7 @@ const initialState = {
 export const useSettingsStore = create<SettingsStore>()(
   devtools(
     persist(
-      (set, get) => ({
+      (set) => ({
         ...initialState,
 
         updateTheme: (theme) => set({ theme }),
