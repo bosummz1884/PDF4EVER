@@ -48,6 +48,8 @@ export interface Theme {
   };
 }
 
+
+
 export interface FileSource {
   type: 'local' | 'cloud' | 'url';
   provider?: 'google-drive' | 'dropbox' | 'onedrive';
@@ -76,6 +78,7 @@ export interface NavigationMode {
   autoAdvance?: boolean;
   interval?: number;
 }
+
 
 export interface ZoomLevel {
   value: number;

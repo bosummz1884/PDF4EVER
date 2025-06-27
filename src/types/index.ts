@@ -210,6 +210,13 @@ export interface FileItem {
   isUploading?: boolean;
   uploadProgress?: number;
   error?: string;
+  file?: File;
+  cloudProvider?: string | CloudProvider;
+  cloudPath?: string;
+  
+
+
+  
 }
 
 // OCR Types

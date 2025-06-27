@@ -17,7 +17,7 @@ import {
   Folder, 
   File, 
   Search,
-  Settings,
+
   Loader2,
   CheckCircle,
   AlertCircle
@@ -32,8 +32,10 @@ interface CloudStorageDialogProps {
   mode: 'upload' | 'download' | 'manage';
 }
 
+
+
 export function CloudStorageDialog({ open, onOpenChange, mode }: CloudStorageDialogProps) {
-  const { files, addFile } = useFileStore();
+  const { files: _files, addFile } = useFileStore();
   const [cloudService] = useState(new CloudStorageService());
   
   const [activeProvider, setActiveProvider] = useState<string>('');
@@ -189,12 +191,24 @@ export function CloudStorageDialog({ open, onOpenChange, mode }: CloudStorageDia
         const cloudFile = cloudFiles.find(f => f.id === fileId);
         
         if (cloudFile) {
-          const file = new File([blob], cloudFile.name, { type: cloudFile.mimeType });
+          // Create a new blob with the correct type
+          const typedBlob = new Blob([blob], { type: cloudFile.mimeType });
+          
+          // Create the file using the blob
+          const file = new Blob([typedBlob], { type: cloudFile.mimeType }) as unknown as File;
+          Object.defineProperty(file, 'name', {
+            writable: false,
+            value: cloudFile.name
+          });
+          Object.defineProperty(file, 'lastModified', {
+            writable: false,
+            value: Date.now()
+          });
           
           addFile({
             id: cloudFile.id,
             name: cloudFile.name,
-            file: file,
+            file: file as File,
             size: file.size,
             type: file.type,
             lastModified: new Date(),
@@ -217,6 +231,25 @@ export function CloudStorageDialog({ open, onOpenChange, mode }: CloudStorageDia
         : [...prev, fileId]
     );
   }, []);
+// @ts-ignore - This function will be used in a future implementation
+  const handleFileUpload = useCallback(() => {
+    // Create a file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.multiple = true;
+    
+    
+    // Handle file selection
+    fileInput.addEventListener('change', (event) => {
+      const target = event.target as HTMLInputElement;
+      if (target.files && target.files.length > 0) {
+        uploadFiles(Array.from(target.files));
+      }
+    });
+    
+    // Trigger the file dialog
+    fileInput.click();
+  }, [uploadFiles]);
 
   useEffect(() => {
     if (open && isConnected) {

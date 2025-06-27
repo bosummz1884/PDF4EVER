@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, File, AlertCircle } from 'lucide-react';
 import { Button } from './ui/button';
@@ -7,7 +7,7 @@ import { useFileStore } from '../stores/fileStore';
 import { PDFDocument, FileItem } from '../types';
 
 export function FileUploader() {
-  const { addDocument, setCurrentDocument, setLoading, setError } = usePDFStore();
+  const { addDocument, setCurrentDocument, setError } = usePDFStore();
   const { addFile, setFileUploading, setUploadProgress } = useFileStore();
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {

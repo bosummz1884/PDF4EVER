@@ -11,8 +11,7 @@ interface AnnotationOverlayProps {
   scale: number;
 }
 
-export function AnnotationOverlay({ 
-  pageNumber, 
+export function AnnotationOverlay({  
   annotations, 
   scale 
 }: AnnotationOverlayProps) {
@@ -35,7 +34,7 @@ export function AnnotationOverlay({
     }
   }, [selectedAnnotations, selectAnnotation]);
 
-  const handleOverlayClick = useCallback((event: React.MouseEvent) => {
+  const handleOverlayClick = useCallback((_event: React.MouseEvent) => {
     if (currentTool === 'select') {
       clearSelection();
     }

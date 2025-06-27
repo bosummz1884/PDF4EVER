@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
-import { Settings, Palette, Type, Square } from 'lucide-react';
+import { Palette, Type, Square } from 'lucide-react';
 import { useAnnotationStore } from '../stores/annotationStore';
 import { usePDFStore } from '../stores/pdfStore';
 import { Button } from './ui/button';

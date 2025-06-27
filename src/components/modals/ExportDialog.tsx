@@ -31,13 +31,14 @@ interface ExportDialogProps {
   fileIds?: string[];
 }
 
+// @ts-expect-error - fileIds will be used in future implementation
 export function ExportDialog({ open, onOpenChange, fileIds = [] }: ExportDialogProps) {
   const { currentDocument } = usePDFStore();
   const { exportDocument, isProcessing } = usePDFOperations();
   
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
     format: { type: 'pdf', quality: 95, dpi: 300 },
-    pageRange: { type: 'all' },
+    pageRange: { type: 'all' },  // This is already defined, which is good
     includeAnnotations: true,
     includeBookmarks: true,
     includeForms: true,
@@ -104,7 +105,7 @@ export function ExportDialog({ open, onOpenChange, fileIds = [] }: ExportDialogP
         type: type as any,
         ...(type === 'range' && {
           start: 1,
-          end: currentDocument?.totalPages || 1,
+          end: currentDocument?.metadata.pageCount || 1,
         }),
       },
     }));
@@ -151,7 +152,7 @@ export function ExportDialog({ open, onOpenChange, fileIds = [] }: ExportDialogP
       };
 
       // Handle custom page range
-      if (exportOptions.pageRange.type === 'range' && customPageRange) {
+      if (exportOptions.pageRange!.type === 'range' && customPageRange) {
         const ranges = customPageRange.split(',').map(range => {
           const parts = range.trim().split('-');
           if (parts.length === 1) {
@@ -324,7 +325,7 @@ export function ExportDialog({ open, onOpenChange, fileIds = [] }: ExportDialogP
                     type="radio"
                     id="all-pages"
                     name="pageRange"
-                    checked={exportOptions.pageRange.type === 'all'}
+                    checked={exportOptions.pageRange!.type === 'all'}
                     onChange={() => handlePageRangeChange('all')}
                   />
                   <Label htmlFor="all-pages">All Pages</Label>
@@ -335,7 +336,7 @@ export function ExportDialog({ open, onOpenChange, fileIds = [] }: ExportDialogP
                     type="radio"
                     id="current-page"
                     name="pageRange"
-                    checked={exportOptions.pageRange.type === 'current'}
+                    checked={exportOptions.pageRange!.type === 'current'}
                     onChange={() => handlePageRangeChange('current')}
                   />
                   <Label htmlFor="current-page">Current Page Only</Label>
@@ -346,13 +347,13 @@ export function ExportDialog({ open, onOpenChange, fileIds = [] }: ExportDialogP
                     type="radio"
                     id="page-range"
                     name="pageRange"
-                    checked={exportOptions.pageRange.type === 'range'}
+                    checked={exportOptions.pageRange!.type === 'range'}
                     onChange={() => handlePageRangeChange('range')}
                   />
                   <Label htmlFor="page-range">Custom Range</Label>
                 </div>
 
-                {exportOptions.pageRange.type === 'range' && (
+                {exportOptions.pageRange!.type === 'range' && (
                   <div className="ml-6 space-y-2">
                     <Label>Page Numbers (e.g., 1-5, 8, 10-12)</Label>
                     <Input

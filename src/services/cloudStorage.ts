@@ -15,20 +15,18 @@ export interface CloudStorageProvider {
 
 class GoogleDriveProvider implements CloudStorageProvider {
   private accessToken: string | null = null;
-  private apiKey: string | null = null;
 
   async connect(config: CloudStorageConfig): Promise<void> {
     this.accessToken = config.credentials.accessToken;
-    this.apiKey = config.credentials.apiKey;
     
     if (!this.accessToken) {
       throw new Error('Google Drive access token required');
     }
   }
 
+
   async disconnect(): Promise<void> {
     this.accessToken = null;
-    this.apiKey = null;
   }
 
   async listFiles(path?: string): Promise<CloudFile[]> {
@@ -326,7 +324,7 @@ class DropboxProvider implements CloudStorageProvider {
     }));
   }
 
-  async uploadFile(file: File, path: string, onProgress?: (progress: UploadProgress) => void): Promise<CloudFile> {
+  async uploadFile(file: File, path: string, _onProgress?: (progress: UploadProgress) => void): Promise<CloudFile> {
     if (!this.accessToken) throw new Error('Not connected');
 
     const fullPath = `${path}/${file.name}`;

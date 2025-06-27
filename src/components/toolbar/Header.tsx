@@ -1,4 +1,3 @@
-import React from 'react';
 import { 
   File, Save, Download, Upload, Undo, Redo, 
   ZoomIn, ZoomOut, Menu, Settings, Search,
@@ -13,11 +12,9 @@ import { useHistoryStore } from '../../stores/historyStore';
 export function Header() {
   const { currentDocument, setCurrentDocument } = usePDFStore();
   const { 
-    zoom, 
-    setZoom, 
+    zoom,  
     zoomIn, 
     zoomOut, 
-    sidebarVisible, 
     propertiesVisible,
     toggleSidebar,
     toggleProperties 

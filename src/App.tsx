@@ -1,4 +1,3 @@
-import React from 'react';
 import { PDFEditor } from './components/PDFEditor';
 import { usePDFStore } from './stores/pdfStore';
 import { useUIStore } from './stores/uiStore';
