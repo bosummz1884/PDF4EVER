@@ -1,4 +1,3 @@
-import React from 'react';
 import { Header } from './toolbar/Header';
 import { Sidebar } from './Sidebar';
 import { PDFViewer } from './pdf/PDFViewer';
